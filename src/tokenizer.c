@@ -93,6 +93,54 @@ void printToken(Token token)
     case TOKEN_IDENTIFIER:
         desc = "IDENTIFIER";
         break;
+    case TOKEN_AND:
+        desc = "AND";
+        break;
+    case TOKEN_CLASS:
+        desc = "CLASS";
+        break;
+    case TOKEN_ELSE:
+        desc = "ELSE";
+        break;
+    case TOKEN_IF:
+        desc = "IF";
+        break;
+    case TOKEN_NIL:
+        desc = "NIL";
+        break;
+    case TOKEN_OR:
+        desc = "OR";
+        break;
+    case TOKEN_PRINT:
+        desc = "PRINT";
+        break;
+    case TOKEN_RETURN:
+        desc = "RETURN";
+        break;
+    case TOKEN_SUPER:
+        desc = "SUPER";
+        break;
+    case TOKEN_VAR:
+        desc = "VAR";
+        break;
+    case TOKEN_WHILE:
+        desc = "WHILE";
+        break;
+    case TOKEN_FALSE:
+        desc = "FALSE";
+        break;
+    case TOKEN_FOR:
+        desc = "FOR";
+        break;
+    case TOKEN_FUN:
+        desc = "FUN";
+        break;
+    case TOKEN_THIS:
+        desc = "THIS";
+        break;
+    case TOKEN_TRUE:
+        desc = "TRUE";
+        break;
     default:
         return;
     }

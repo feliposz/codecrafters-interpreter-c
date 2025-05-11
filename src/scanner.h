@@ -27,6 +27,22 @@ typedef enum
     TOKEN_STRING,
     TOKEN_NUMBER,
     TOKEN_IDENTIFIER,
+    TOKEN_AND,
+    TOKEN_CLASS,
+    TOKEN_ELSE,
+    TOKEN_IF,
+    TOKEN_NIL,
+    TOKEN_OR,
+    TOKEN_PRINT,
+    TOKEN_RETURN,
+    TOKEN_SUPER,
+    TOKEN_VAR,
+    TOKEN_WHILE,
+    TOKEN_FALSE,
+    TOKEN_FOR,
+    TOKEN_FUN,
+    TOKEN_THIS,
+    TOKEN_TRUE,
 } TokenType;
 
 typedef struct
