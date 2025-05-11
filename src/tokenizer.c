@@ -41,6 +41,9 @@ void printToken(Token token)
     case TOKEN_SEMICOLON:
         desc = "SEMICOLON";
         break;
+    case TOKEN_SLASH:
+        desc = "SLASH";
+        break;
     case TOKEN_STAR:
         desc = "STAR";
         break;
