@@ -83,6 +83,12 @@ void skipWhitespace()
     {
         switch (peek())
         {
+        case ' ':
+        case '\r':
+        case '\t':
+        case '\n':
+            advance();
+            break;
         case '/':
             if (peekNext() == '/')
             {
@@ -91,7 +97,11 @@ void skipWhitespace()
                     advance();
                 }
             }
-            return;
+            else
+            {
+                return;
+            }
+            break;
         default:
             return;
         }
