@@ -115,7 +115,8 @@ Token string()
 {
     while (peek() != '"' && !isAtEnd())
     {
-        if (peek() == '\n') {
+        if (peek() == '\n')
+        {
             scanner.line++;
         }
         advance();
@@ -129,6 +130,28 @@ Token string()
     return makeToken(TOKEN_STRING);
 }
 
+bool isDigit(char c)
+{
+    return c >= '0' && c <= '9';
+}
+
+Token number()
+{
+    while (isDigit(peek()))
+    {
+        advance();
+    }
+    if (peek() == '.' && isDigit(peekNext()))
+    {
+        advance();
+        while (isDigit(peek()))
+        {
+            advance();
+        }
+    }
+    return makeToken(TOKEN_NUMBER);
+}
+
 Token scanToken()
 {
     skipWhitespace();
@@ -138,6 +161,10 @@ Token scanToken()
         return makeToken(TOKEN_EOF);
     }
     char c = advance();
+    if (isDigit(c))
+    {
+        return number();
+    }
     switch (c)
     {
     case '(':

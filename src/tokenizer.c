@@ -78,6 +78,18 @@ void printToken(Token token)
         valueString = (char *)(token.start + 1);
         valueLength = token.length - 2;
         break;
+    case TOKEN_NUMBER:
+        desc = "NUMBER";
+        double value = atof(token.start);
+        if (value == (int)value)
+        {
+            printf("%s %.*s %.1f\n", desc, token.length, token.start, value);
+        }
+        else
+        {
+            printf("%s %.*s %.9g\n", desc, token.length, token.start, value);
+        }
+        return;
     default:
         return;
     }
