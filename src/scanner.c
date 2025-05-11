@@ -86,7 +86,10 @@ void skipWhitespace()
         case ' ':
         case '\r':
         case '\t':
+            advance();
+            break;
         case '\n':
+            scanner.line++;
             advance();
             break;
         case '/':
