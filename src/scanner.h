@@ -7,6 +7,8 @@ typedef enum
     TOKEN_ERROR,
     TOKEN_LEFT_PAREN,
     TOKEN_RIGHT_PAREN,
+    TOKEN_LEFT_BRACE,
+    TOKEN_RIGHT_BRACE,
 } TokenType;
 
 typedef struct

@@ -17,6 +17,12 @@ void printToken(Token token)
     case TOKEN_RIGHT_PAREN:
         desc = "RIGHT_PAREN";
         break;
+    case TOKEN_LEFT_BRACE:
+        desc = "LEFT_BRACE";
+        break;
+    case TOKEN_RIGHT_BRACE:
+        desc = "RIGHT_BRACE";
+        break;
     case TOKEN_EOF:
         desc = "EOF";
         break;
