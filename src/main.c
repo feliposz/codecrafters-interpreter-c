@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "common.h"
 #include "tokenizer.h"
 
 int main(int argc, char *argv[])
@@ -19,7 +21,11 @@ int main(int argc, char *argv[])
 
     if (strcmp(command, "tokenize") == 0)
     {
-        tokenizer(argv[2]);
+        bool hadError = tokenizer(argv[2]);
+        if (hadError)
+        {
+            exit(65);
+        }
     }
     else
     {

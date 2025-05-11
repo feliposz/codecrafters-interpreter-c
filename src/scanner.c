@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include "common.h"
 #include "scanner.h"
@@ -81,5 +82,6 @@ Token scanToken()
     case '*':
         return makeToken(TOKEN_STAR);
     }
+    fprintf(stderr, "[line %d] Error: Unexpected character: %c\n", scanner.line, c);
     return errorToken("Unexpected character");
 }

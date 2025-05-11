@@ -50,8 +50,9 @@ void printToken(Token token)
     printf("%s %.*s %s\n", desc, token.length, token.start, value);
 }
 
-void tokenizer(const char *path)
+bool tokenizer(const char *path)
 {
+    bool hadError = false;
     char *source = readFile(path);
     initScanner(source);
     int line = -1;
@@ -59,10 +60,15 @@ void tokenizer(const char *path)
     {
         Token token = scanToken();
         printToken(token);
+        if (token.type == TOKEN_ERROR)
+        {
+            hadError = true;
+        }
         if (token.type == TOKEN_EOF)
         {
             break;
         }
     }
     free(source);
+    return hadError;
 }

@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "util.h": "c"
+        "util.h": "c",
+        "tokenizer.h": "c",
+        "common.h": "c"
     }
 }
