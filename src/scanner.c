@@ -111,6 +111,24 @@ void skipWhitespace()
     }
 }
 
+Token string()
+{
+    while (peek() != '"' && !isAtEnd())
+    {
+        if (peek() == '\n') {
+            scanner.line++;
+        }
+        advance();
+    }
+    if (isAtEnd())
+    {
+        fprintf(stderr, "[line %d] Error: Unterminated string.\n", scanner.line);
+        return errorToken("Unterminated string.");
+    }
+    advance();
+    return makeToken(TOKEN_STRING);
+}
+
 Token scanToken()
 {
     skipWhitespace();
@@ -152,6 +170,8 @@ Token scanToken()
         return makeToken(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
     case '>':
         return makeToken(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
+    case '"':
+        return string();
     }
     fprintf(stderr, "[line %d] Error: Unexpected character: %c\n", scanner.line, c);
     return errorToken("Unexpected character");

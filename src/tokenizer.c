@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include "common.h"
 #include "util.h"
@@ -8,7 +9,8 @@
 void printToken(Token token)
 {
     char *desc = "???";
-    char *value = "null";
+    char *valueString = "null";
+    int valueLength = strlen(valueString);
     switch (token.type)
     {
     case TOKEN_LEFT_PAREN:
@@ -71,10 +73,15 @@ void printToken(Token token)
     case TOKEN_GREATER_EQUAL:
         desc = "GREATER_EQUAL";
         break;
+    case TOKEN_STRING:
+        desc = "STRING";
+        valueString = (char *)(token.start + 1);
+        valueLength = token.length - 2;
+        break;
     default:
         return;
     }
-    printf("%s %.*s %s\n", desc, token.length, token.start, value);
+    printf("%s %.*s %.*s\n", desc, token.length, token.start, valueLength, valueString);
 }
 
 bool tokenizer(const char *path)
