@@ -50,6 +50,12 @@ void printToken(Token token)
     case TOKEN_EQUAL_EQUAL:
         desc = "EQUAL_EQUAL";
         break;
+    case TOKEN_BANG:
+        desc = "BANG";
+        break;
+    case TOKEN_BANG_EQUAL:
+        desc = "BANG_EQUAL";
+        break;
     default:
         return;
     }
