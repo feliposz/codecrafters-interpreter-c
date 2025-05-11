@@ -26,6 +26,7 @@ typedef enum
     TOKEN_GREATER_EQUAL,
     TOKEN_STRING,
     TOKEN_NUMBER,
+    TOKEN_IDENTIFIER,
 } TokenType;
 
 typedef struct

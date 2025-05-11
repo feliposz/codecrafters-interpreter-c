@@ -90,6 +90,9 @@ void printToken(Token token)
             printf("%s %.*s %.9g\n", desc, token.length, token.start, value);
         }
         return;
+    case TOKEN_IDENTIFIER:
+        desc = "IDENTIFIER";
+        break;
     default:
         return;
     }

@@ -152,6 +152,19 @@ Token number()
     return makeToken(TOKEN_NUMBER);
 }
 
+bool isAlpha(char c)
+{
+    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_';
+}
+
+Token identifier()
+{
+    while (isAlpha(peek()) || isDigit(peek()))
+    {
+        advance();
+    }
+    return makeToken(TOKEN_IDENTIFIER);
+}
 Token scanToken()
 {
     skipWhitespace();
@@ -161,6 +174,10 @@ Token scanToken()
         return makeToken(TOKEN_EOF);
     }
     char c = advance();
+    if (isAlpha(c))
+    {
+        return identifier();
+    }
     if (isDigit(c))
     {
         return number();
