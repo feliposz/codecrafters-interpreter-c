@@ -56,6 +56,18 @@ void printToken(Token token)
     case TOKEN_BANG_EQUAL:
         desc = "BANG_EQUAL";
         break;
+    case TOKEN_LESS:
+        desc = "LESS";
+        break;
+    case TOKEN_LESS_EQUAL:
+        desc = "LESS_EQUAL";
+        break;
+    case TOKEN_GREATER:
+        desc = "GREATER";
+        break;
+    case TOKEN_GREATER_EQUAL:
+        desc = "GREATER_EQUAL";
+        break;
     default:
         return;
     }

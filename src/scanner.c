@@ -99,6 +99,10 @@ Token scanToken()
         return makeToken(match('=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL);
     case '!':
         return makeToken(match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
+    case '<':
+        return makeToken(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
+    case '>':
+        return makeToken(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
     }
     fprintf(stderr, "[line %d] Error: Unexpected character: %c\n", scanner.line, c);
     return errorToken("Unexpected character");
