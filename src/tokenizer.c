@@ -44,6 +44,12 @@ void printToken(Token token)
     case TOKEN_STAR:
         desc = "STAR";
         break;
+    case TOKEN_EQUAL:
+        desc = "EQUAL";
+        break;
+    case TOKEN_EQUAL_EQUAL:
+        desc = "EQUAL_EQUAL";
+        break;
     default:
         return;
     }

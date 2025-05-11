@@ -49,6 +49,20 @@ bool isAtEnd()
     return *scanner.current == '\0';
 }
 
+bool match(char expected)
+{
+    if (isAtEnd())
+    {
+        return false;
+    }
+    if (*scanner.current != expected)
+    {
+        return false;
+    }
+    scanner.current++;
+    return true;
+}
+
 Token scanToken()
 {
     scanner.start = scanner.current;
@@ -81,6 +95,8 @@ Token scanToken()
         return makeToken(TOKEN_SLASH);
     case '*':
         return makeToken(TOKEN_STAR);
+    case '=':
+        return makeToken(match('=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL);
     }
     fprintf(stderr, "[line %d] Error: Unexpected character: %c\n", scanner.line, c);
     return errorToken("Unexpected character");

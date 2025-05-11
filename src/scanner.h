@@ -16,6 +16,8 @@ typedef enum
     TOKEN_SEMICOLON,
     TOKEN_SLASH,
     TOKEN_STAR,
+    TOKEN_EQUAL,
+    TOKEN_EQUAL_EQUAL,
 } TokenType;
 
 typedef struct
