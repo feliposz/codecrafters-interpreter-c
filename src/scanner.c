@@ -66,6 +66,20 @@ Token scanToken()
         return makeToken(TOKEN_LEFT_BRACE);
     case '}':
         return makeToken(TOKEN_RIGHT_BRACE);
+    case ',':
+        return makeToken(TOKEN_COMMA);
+    case '.':
+        return makeToken(TOKEN_DOT);
+    case '-':
+        return makeToken(TOKEN_MINUS);
+    case '+':
+        return makeToken(TOKEN_PLUS);
+    case ';':
+        return makeToken(TOKEN_SEMICOLON);
+    case '/':
+        return makeToken(TOKEN_SLASH);
+    case '*':
+        return makeToken(TOKEN_STAR);
     }
     return errorToken("Unexpected character");
 }

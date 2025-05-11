@@ -26,6 +26,24 @@ void printToken(Token token)
     case TOKEN_EOF:
         desc = "EOF";
         break;
+    case TOKEN_COMMA:
+        desc = "COMMA";
+        break;
+    case TOKEN_DOT:
+        desc = "DOT";
+        break;
+    case TOKEN_MINUS:
+        desc = "MINUS";
+        break;
+    case TOKEN_PLUS:
+        desc = "PLUS";
+        break;
+    case TOKEN_SEMICOLON:
+        desc = "SEMICOLON";
+        break;
+    case TOKEN_STAR:
+        desc = "STAR";
+        break;
     default:
         return;
     }
