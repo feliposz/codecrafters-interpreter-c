@@ -14,6 +14,8 @@ typedef struct
 
 Parser parser;
 
+typedef void (*ParseFn)();
+
 static void advance()
 {
     parser.previous = parser.current;
@@ -65,10 +67,62 @@ static void consume(TokenType type, const char *message)
     advance();
 }
 
+static void literal()
+{
+    printf("%.*s\n", parser.previous.length, parser.previous.start);
+}
+
+static void string()
+{
+    printf("%.*s\n", parser.previous.length - 2, parser.previous.start + 1);
+}
+
+static void number()
+{
+    double value = strtod(parser.previous.start, NULL);
+    printf("%g\n", value);
+}
+
+typedef enum
+{
+    PREC_NONE,
+} Precedence;
+
+typedef struct
+{
+    ParseFn prefix;
+    ParseFn infix;
+    Precedence precedence;
+} ParseRule;
+
+ParseRule rules[] = {
+    [TOKEN_STRING] = {string, NULL, PREC_NONE},
+    [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
+    [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
+    [TOKEN_NIL] = {literal, NULL, PREC_NONE},
+    [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
+};
+
+static ParseRule *getRule(TokenType type)
+{
+    return &rules[type];
+}
+
+static void parsePrecedence(Precedence precedence)
+{
+    advance();
+    ParseFn prefixRule = getRule(parser.previous.type)->prefix;
+    if (prefixRule == NULL)
+    {
+        error("Expect expression");
+        return;
+    }
+    prefixRule();
+}
+
 static void expression()
 {
-    printf("%.*s\n", parser.current.length, parser.current.start);
-    advance();
+    parsePrecedence(PREC_NONE);
 }
 
 bool compile(const char *source)
@@ -85,7 +139,8 @@ bool compile(const char *source)
 bool evaluate(const char *path)
 {
     char *source = readFile(path);
-    if (source == NULL) {
+    if (source == NULL)
+    {
         return false;
     }
     bool success = compile(source);
