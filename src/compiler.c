@@ -183,6 +183,12 @@ static void binary()
     parsePrecedence((Precedence)(rule->precedence + 1));
     switch (operatorType)
     {
+    case TOKEN_PLUS:
+        emitByte(OP_ADD);
+        break;
+    case TOKEN_MINUS:
+        emitByte(OP_SUBTRACT);
+        break;
     case TOKEN_STAR:
         emitByte(OP_MULTIPLY);
         break;
@@ -202,7 +208,8 @@ static void grouping()
 
 ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
-    [TOKEN_MINUS] = {unary, NULL, PREC_TERM},
+    [TOKEN_MINUS] = {unary, binary, PREC_TERM},
+    [TOKEN_PLUS] = {NULL, binary, PREC_TERM},
     [TOKEN_BANG] = {unary, NULL, PREC_NONE},
     [TOKEN_SLASH] = {NULL, binary, PREC_FACTOR},
     [TOKEN_STAR] = {NULL, binary, PREC_FACTOR},

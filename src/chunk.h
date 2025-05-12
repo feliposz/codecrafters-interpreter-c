@@ -13,6 +13,8 @@ typedef enum
     OP_TRUE,
     OP_NEGATE,
     OP_NOT,
+    OP_ADD,
+    OP_SUBTRACT,
     OP_MULTIPLY,
     OP_DIVIDE,
 } OpCode;

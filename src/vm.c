@@ -71,6 +71,12 @@ static InterpretResult run()
         case OP_NOT:
             push(BOOL_VAL(isFalsey(pop())));
             break;
+        case OP_ADD:
+            BINARY_OP(+);
+            break;
+        case OP_SUBTRACT:
+            BINARY_OP(-);
+            break;
         case OP_MULTIPLY:
             BINARY_OP(*);
             break;
