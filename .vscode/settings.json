@@ -18,6 +18,7 @@
         "memory.h": "c",
         "object.h": "c",
         "vm.h": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "random": "c"
     }
 }

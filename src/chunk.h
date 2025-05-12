@@ -13,6 +13,8 @@ typedef enum
     OP_TRUE,
     OP_NEGATE,
     OP_NOT,
+    OP_MULTIPLY,
+    OP_DIVIDE,
 } OpCode;
 
 typedef struct

@@ -15,6 +15,7 @@ typedef enum
 {
     PREC_NONE,
     PREC_TERM,
+    PREC_FACTOR,
     PREC_UNARY,
 } Precedence;
 
@@ -25,6 +26,7 @@ typedef struct
     Precedence precedence;
 } ParseRule;
 
+static ParseRule *getRule(TokenType type);
 static void parsePrecedence(Precedence precedence);
 static void expression();
 
@@ -174,6 +176,24 @@ static void unary()
     }
 }
 
+static void binary()
+{
+    TokenType operatorType = parser.previous.type;
+    ParseRule *rule = getRule(operatorType);
+    parsePrecedence((Precedence)(rule->precedence + 1));
+    switch (operatorType)
+    {
+    case TOKEN_STAR:
+        emitByte(OP_MULTIPLY);
+        break;
+    case TOKEN_SLASH:
+        emitByte(OP_DIVIDE);
+        break;
+    default:
+        return;
+    }
+}
+
 static void grouping()
 {
     expression();
@@ -184,6 +204,8 @@ ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
     [TOKEN_MINUS] = {unary, NULL, PREC_TERM},
     [TOKEN_BANG] = {unary, NULL, PREC_NONE},
+    [TOKEN_SLASH] = {NULL, binary, PREC_FACTOR},
+    [TOKEN_STAR] = {NULL, binary, PREC_FACTOR},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},

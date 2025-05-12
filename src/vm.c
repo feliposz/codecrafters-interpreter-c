@@ -33,6 +33,12 @@ static InterpretResult run()
 {
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
+#define BINARY_OP(op)                                   \
+    {                                                   \
+        Value b = pop();                                \
+        Value a = pop();                                \
+        push(NUMBER_VAL(AS_NUMBER(a) op AS_NUMBER(b))); \
+    }
 
     for (;;)
     {
@@ -65,6 +71,12 @@ static InterpretResult run()
         case OP_NOT:
             push(BOOL_VAL(isFalsey(pop())));
             break;
+        case OP_MULTIPLY:
+            BINARY_OP(*);
+            break;
+        case OP_DIVIDE:
+            BINARY_OP(/);
+            break;
         case OP_CONSTANT:
         {
             Value constant = READ_CONSTANT();
@@ -87,6 +99,7 @@ static InterpretResult run()
 
 #undef READ_BYTE
 #undef READ_CONSTANT
+#undef BINARY_OP
 }
 
 InterpretResult interpret(Chunk *chunk)
