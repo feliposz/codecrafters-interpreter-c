@@ -25,12 +25,17 @@ ObjString *allocateString(char *chars, int length)
     return string;
 }
 
-ObjString *copyString(const char *chars, int length)
+ObjString *copyString(char *chars, int length)
 {
     char *heapChars = ALLOCATE(char, length + 1);
     memcpy(heapChars, chars, length);
     heapChars[length] = '\0';
     return allocateString(heapChars, length);
+}
+
+ObjString *takeString(char *chars, int length)
+{
+    return allocateString(chars, length);
 }
 
 void printObject(Value value)

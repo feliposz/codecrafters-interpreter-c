@@ -63,12 +63,12 @@ bool match(char expected)
     return true;
 }
 
-char peek()
+static char peek()
 {
     return *scanner.current;
 }
 
-char peekNext()
+static char peekNext()
 {
     if (isAtEnd())
     {
