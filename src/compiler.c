@@ -157,6 +157,23 @@ static void number()
     emitConstant(NUMBER_VAL(value));
 }
 
+static void unary()
+{
+    TokenType operatorType = parser.previous.type;
+    parsePrecedence(PREC_UNARY);
+    switch (operatorType)
+    {
+    case TOKEN_MINUS:
+        emitByte(OP_NEGATE);
+        break;
+    case TOKEN_BANG:
+        emitByte(OP_NOT);
+        break;
+    default:
+        return;
+    }
+}
+
 static void grouping()
 {
     expression();
@@ -165,6 +182,8 @@ static void grouping()
 
 ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
+    [TOKEN_MINUS] = {unary, NULL, PREC_TERM},
+    [TOKEN_BANG] = {unary, NULL, PREC_NONE},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},

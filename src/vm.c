@@ -24,6 +24,11 @@ void freeVM()
     freeObjects();
 }
 
+static bool isFalsey(Value value)
+{
+    return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
+}
+
 static InterpretResult run()
 {
 #define READ_BYTE() (*vm.ip++)
@@ -53,6 +58,12 @@ static InterpretResult run()
             break;
         case OP_TRUE:
             push(BOOL_VAL(true));
+            break;
+        case OP_NEGATE:
+            push(NUMBER_VAL(-AS_NUMBER(pop())));
+            break;
+        case OP_NOT:
+            push(BOOL_VAL(isFalsey(pop())));
             break;
         case OP_CONSTANT:
         {
