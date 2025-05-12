@@ -14,6 +14,7 @@ typedef void (*ParseFn)();
 typedef enum
 {
     PREC_NONE,
+    PREC_EQUALITY,
     PREC_COMPARISON,
     PREC_TERM,
     PREC_FACTOR,
@@ -208,6 +209,12 @@ static void binary()
     case TOKEN_LESS_EQUAL:
         emitByte(OP_LESS_EQUAL);
         break;
+    case TOKEN_EQUAL_EQUAL:
+        emitByte(OP_EQUAL);
+        break;
+    case TOKEN_BANG_EQUAL:
+        emitByte(OP_NOT_EQUAL);
+        break;
     default:
         return;
     }
@@ -224,6 +231,8 @@ ParseRule rules[] = {
     [TOKEN_MINUS] = {unary, binary, PREC_TERM},
     [TOKEN_PLUS] = {NULL, binary, PREC_TERM},
     [TOKEN_BANG] = {unary, NULL, PREC_NONE},
+    [TOKEN_BANG_EQUAL] = {NULL, binary, PREC_EQUALITY},
+    [TOKEN_EQUAL_EQUAL] = {NULL, binary, PREC_EQUALITY},
     [TOKEN_GREATER] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_GREATER_EQUAL] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_LESS] = {NULL, binary, PREC_COMPARISON},
@@ -263,7 +272,7 @@ static void parsePrecedence(Precedence precedence)
 
 static void expression()
 {
-    parsePrecedence(PREC_COMPARISON);
+    parsePrecedence(PREC_EQUALITY);
 }
 
 static void endCompiler()

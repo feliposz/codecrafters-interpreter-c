@@ -69,6 +69,33 @@ static void concatenate()
     push(OBJ_VAL(result));
 }
 
+static bool valuesEqual(Value a, Value b)
+{
+    if (a.type != b.type)
+    {
+        return false;
+    }
+    switch (a.type)
+    {
+    case VAL_NIL:
+        return true;
+    case VAL_BOOL:
+        return AS_BOOL(a) == AS_BOOL(b);
+    case VAL_NUMBER:
+        return AS_NUMBER(a) == AS_NUMBER(b);
+    case VAL_OBJ:
+    {
+        ObjString *aString = AS_STRING(a);
+        ObjString *bString = AS_STRING(b);
+        return aString->length == bString->length &&
+               memcmp(aString->chars, bString->chars, aString->length) == 0;
+        break;
+    }
+    default:
+        return false; // unreachable
+    }
+}
+
 static InterpretResult run()
 {
 #define READ_BYTE() (*vm.ip++)
@@ -151,6 +178,20 @@ static InterpretResult run()
         case OP_LESS_EQUAL:
             BINARY_OP(BOOL_VAL, <=);
             break;
+        case OP_EQUAL:
+        {
+            Value b = pop();
+            Value a = pop();
+            push(BOOL_VAL(valuesEqual(a, b)));
+            break;
+        }
+        case OP_NOT_EQUAL:
+        {
+            Value b = pop();
+            Value a = pop();
+            push(BOOL_VAL(!valuesEqual(a, b)));
+            break;
+        }
         case OP_CONSTANT:
         {
             Value constant = READ_CONSTANT();
