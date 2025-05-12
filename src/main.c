@@ -7,6 +7,7 @@
 
 bool evaluate(const char *source);
 void testChunk();
+void testVM();
 
 int main(int argc, char *argv[])
 {
@@ -41,6 +42,10 @@ int main(int argc, char *argv[])
     else if (strcmp(command, "testchunk") == 0)
     {
         testChunk();
+    }
+    else if (strcmp(command, "testvm") == 0)
+    {
+        testVM();
     }
     else
     {
