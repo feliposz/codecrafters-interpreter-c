@@ -133,6 +133,10 @@ static InterpretResult run()
             push(BOOL_VAL(true));
             break;
         case OP_NEGATE:
+            if (!IS_NUMBER(peek(0))) {
+                runtimeError("Operand must be a number.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
             push(NUMBER_VAL(-AS_NUMBER(pop())));
             break;
         case OP_NOT:

@@ -5,7 +5,7 @@
 
 bool compile(const char *source, Chunk *chunk);
 
-bool evaluate(const char *path)
+int evaluate(const char *path)
 {
     Chunk chunk;
     initChunk(&chunk);
@@ -14,15 +14,22 @@ bool evaluate(const char *path)
     {
         return false;
     }
-    bool hadError = true;
+    int errorCode = 0;
     initVM();
     if (compile(source, &chunk))
     {
         InterpretResult result = interpret(&chunk);
-        hadError = result != INTERPRET_OK;
+        if (result == INTERPRET_RUNTIME_ERROR)
+        {
+            errorCode = 70;
+        }
+    }
+    else
+    {
+        errorCode = 65;
     }
     freeVM();
     free(source);
     freeChunk(&chunk);
-    return hadError;
+    return errorCode;
 }

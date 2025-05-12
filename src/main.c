@@ -5,7 +5,7 @@
 #include "common.h"
 #include "tokenizer.h"
 
-bool evaluate(const char *source);
+int evaluate(const char *source);
 void testChunk();
 void testVM();
 
@@ -33,10 +33,10 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(command, "evaluate") == 0)
     {
-        bool hadError = evaluate(argv[2]);
-        if (hadError)
+        int errorCode = evaluate(argv[2]);
+        if (errorCode)
         {
-            exit(65);
+            exit(errorCode);
         }
     }
     else if (strcmp(command, "testchunk") == 0)
