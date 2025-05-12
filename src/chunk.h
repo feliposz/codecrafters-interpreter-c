@@ -17,6 +17,10 @@ typedef enum
     OP_SUBTRACT,
     OP_MULTIPLY,
     OP_DIVIDE,
+    OP_GREATER,
+    OP_GREATER_EQUAL,
+    OP_LESS,
+    OP_LESS_EQUAL,
 } OpCode;
 
 typedef struct

@@ -73,11 +73,11 @@ static InterpretResult run()
 {
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
-#define BINARY_OP(op)                                   \
-    {                                                   \
-        Value b = pop();                                \
-        Value a = pop();                                \
-        push(NUMBER_VAL(AS_NUMBER(a) op AS_NUMBER(b))); \
+#define BINARY_OP(valueType, op)                       \
+    {                                                  \
+        Value b = pop();                               \
+        Value a = pop();                               \
+        push(valueType(AS_NUMBER(a) op AS_NUMBER(b))); \
     }
 
     for (;;)
@@ -131,13 +131,25 @@ static InterpretResult run()
             break;
         }
         case OP_SUBTRACT:
-            BINARY_OP(-);
+            BINARY_OP(NUMBER_VAL, -);
             break;
         case OP_MULTIPLY:
-            BINARY_OP(*);
+            BINARY_OP(NUMBER_VAL, *);
             break;
         case OP_DIVIDE:
-            BINARY_OP(/);
+            BINARY_OP(NUMBER_VAL, /);
+            break;
+        case OP_GREATER:
+            BINARY_OP(BOOL_VAL, >);
+            break;
+        case OP_GREATER_EQUAL:
+            BINARY_OP(BOOL_VAL, >=);
+            break;
+        case OP_LESS:
+            BINARY_OP(BOOL_VAL, <);
+            break;
+        case OP_LESS_EQUAL:
+            BINARY_OP(BOOL_VAL, <=);
             break;
         case OP_CONSTANT:
         {

@@ -14,6 +14,7 @@ typedef void (*ParseFn)();
 typedef enum
 {
     PREC_NONE,
+    PREC_COMPARISON,
     PREC_TERM,
     PREC_FACTOR,
     PREC_UNARY,
@@ -149,7 +150,7 @@ static void literal()
 
 static void string()
 {
-    ObjString *objString = copyString(parser.previous.start + 1, parser.previous.length - 2);
+    ObjString *objString = copyString((char *)parser.previous.start + 1, parser.previous.length - 2);
     emitConstant(OBJ_VAL(objString));
 }
 
@@ -195,6 +196,18 @@ static void binary()
     case TOKEN_SLASH:
         emitByte(OP_DIVIDE);
         break;
+    case TOKEN_GREATER:
+        emitByte(OP_GREATER);
+        break;
+    case TOKEN_GREATER_EQUAL:
+        emitByte(OP_GREATER_EQUAL);
+        break;
+    case TOKEN_LESS:
+        emitByte(OP_LESS);
+        break;
+    case TOKEN_LESS_EQUAL:
+        emitByte(OP_LESS_EQUAL);
+        break;
     default:
         return;
     }
@@ -211,6 +224,10 @@ ParseRule rules[] = {
     [TOKEN_MINUS] = {unary, binary, PREC_TERM},
     [TOKEN_PLUS] = {NULL, binary, PREC_TERM},
     [TOKEN_BANG] = {unary, NULL, PREC_NONE},
+    [TOKEN_GREATER] = {NULL, binary, PREC_COMPARISON},
+    [TOKEN_GREATER_EQUAL] = {NULL, binary, PREC_COMPARISON},
+    [TOKEN_LESS] = {NULL, binary, PREC_COMPARISON},
+    [TOKEN_LESS_EQUAL] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_SLASH] = {NULL, binary, PREC_FACTOR},
     [TOKEN_STAR] = {NULL, binary, PREC_FACTOR},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
@@ -246,7 +263,7 @@ static void parsePrecedence(Precedence precedence)
 
 static void expression()
 {
-    parsePrecedence(PREC_TERM);
+    parsePrecedence(PREC_COMPARISON);
 }
 
 static void endCompiler()
