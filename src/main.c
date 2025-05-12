@@ -6,6 +6,7 @@
 #include "tokenizer.h"
 
 bool evaluate(const char *source);
+void testChunk();
 
 int main(int argc, char *argv[])
 {
@@ -13,9 +14,9 @@ int main(int argc, char *argv[])
     setbuf(stdout, NULL);
     setbuf(stderr, NULL);
 
-    if (argc < 3)
+    if (argc < 2)
     {
-        fprintf(stderr, "Usage: ./your_program tokenize <filename>\n");
+        fprintf(stderr, "Usage: ./your_program <mode> [<filename>]\n");
         return 1;
     }
 
@@ -36,6 +37,10 @@ int main(int argc, char *argv[])
         {
             exit(65);
         }
+    }
+    else if (strcmp(command, "testchunk") == 0)
+    {
+        testChunk();
     }
     else
     {

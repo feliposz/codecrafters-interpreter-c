@@ -1,0 +1,46 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "CMake: configure (debug)",
+            "command": "cmake",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=Debug",
+                "-B",
+                "build",
+                "-S",
+                ".",
+                "-DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Configure and build the project in Debug mode",
+        },
+        {
+            "type": "shell",
+            "label": "CMake: build (debug)",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "./build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": [
+                "CMake: configure (Debug)"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Build the project in Debug mode"
+        }
+    ],
+    "version": "2.0.0"
+}
