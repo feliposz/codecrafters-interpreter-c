@@ -1,6 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include "common.h"
 #include "vm.h"
 #include "debug.h"
+#include "object.h"
+#include "memory.h"
 
 VM vm;
 
@@ -12,13 +16,13 @@ static void resetStack()
 void initVM()
 {
     resetStack();
+    vm.objects = NULL;
 }
 
 void freeVM()
 {
+    freeObjects();
 }
-
-// #define DEBUG_TRACE_EXECUTION
 
 static InterpretResult run()
 {
@@ -41,6 +45,15 @@ static InterpretResult run()
         uint8_t instruction = READ_BYTE();
         switch (instruction)
         {
+        case OP_NIL:
+            push(NIL_VAL);
+            break;
+        case OP_FALSE:
+            push(BOOL_VAL(false));
+            break;
+        case OP_TRUE:
+            push(BOOL_VAL(true));
+            break;
         case OP_CONSTANT:
         {
             Value constant = READ_CONSTANT();
@@ -55,6 +68,8 @@ static InterpretResult run()
             return INTERPRET_OK;
         }
         default:
+            fprintf(stderr, "instruction not implemented: %d\n", instruction);
+            exit(1);
             break;
         }
     }
@@ -86,7 +101,8 @@ void testVM()
 {
     Chunk chunk;
     initChunk(&chunk);
-    int constant = addConstant(&chunk, NUMBER_VAL(1.2));
+    ObjString *objString = copyString("test", 4);
+    int constant = addConstant(&chunk, OBJ_VAL(objString));
     writeChunk(&chunk, OP_CONSTANT, 123);
     writeChunk(&chunk, constant, 123);
     writeChunk(&chunk, OP_RETURN, 123);

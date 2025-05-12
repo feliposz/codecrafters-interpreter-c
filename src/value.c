@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "common.h"
 #include "memory.h"
 #include "value.h"
+#include "object.h"
 
 void initValueArray(ValueArray *array)
 {
@@ -29,5 +31,23 @@ void freeValueArray(ValueArray *array)
 
 void printValue(Value value)
 {
-    printf("%g", AS_NUMBER(value));
+    switch (value.type)
+    {
+    case VAL_NIL:
+        printf("nil");
+        break;
+    case VAL_BOOL:
+        printf("%s", AS_BOOL(value) ? "true" : "false");
+        break;
+    case VAL_NUMBER:
+        printf("%g", AS_NUMBER(value));
+        break;
+    case VAL_OBJ:
+        printObject(value);
+        break;
+    default:
+        printf("type not implemented: %d", value.type);
+        exit(1);
+        break;
+    }
 }

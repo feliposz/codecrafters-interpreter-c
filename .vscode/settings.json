@@ -5,6 +5,19 @@
         "common.h": "c",
         "string.h": "c",
         "chunk.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "debug.h": "c",
+        "value.h": "c",
+        "optional": "c",
+        "system_error": "c",
+        "array": "c",
+        "functional": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "memory.h": "c",
+        "object.h": "c",
+        "vm.h": "c",
+        "algorithm": "c"
     }
 }

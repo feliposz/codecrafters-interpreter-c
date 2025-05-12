@@ -10,7 +10,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/interpreter",
             "args": [
-                "testvm",
+                "evaluate",
+                "value.lox",
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
