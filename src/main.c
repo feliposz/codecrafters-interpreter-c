@@ -5,6 +5,8 @@
 #include "common.h"
 #include "tokenizer.h"
 
+bool evaluate(const char *source);
+
 int main(int argc, char *argv[])
 {
     // Disable output buffering
@@ -22,6 +24,14 @@ int main(int argc, char *argv[])
     if (strcmp(command, "tokenize") == 0)
     {
         bool hadError = tokenizer(argv[2]);
+        if (hadError)
+        {
+            exit(65);
+        }
+    }
+    else if (strcmp(command, "evaluate") == 0)
+    {
+        bool hadError = evaluate(argv[2]);
         if (hadError)
         {
             exit(65);

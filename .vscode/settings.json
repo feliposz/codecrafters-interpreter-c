@@ -2,6 +2,9 @@
     "files.associations": {
         "util.h": "c",
         "tokenizer.h": "c",
-        "common.h": "c"
+        "common.h": "c",
+        "string.h": "c",
+        "chunk.h": "c",
+        "stdlib.h": "c"
     }
 }

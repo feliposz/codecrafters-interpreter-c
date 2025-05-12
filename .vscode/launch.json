@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/interpreter",
-            "args": ["tokenize", "tokens.lox"],
+            "args": ["evaluate", "value.lox"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

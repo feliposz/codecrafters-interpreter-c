@@ -151,6 +151,10 @@ bool tokenizer(const char *path)
 {
     bool hadError = false;
     char *source = readFile(path);
+    if (source == NULL)
+    {
+        return true;
+    }
     initScanner(source);
     int line = -1;
     for (;;)
