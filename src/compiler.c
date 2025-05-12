@@ -4,6 +4,8 @@
 #include "util.h"
 #include "scanner.h"
 
+static void expression();
+
 typedef struct
 {
     Token previous;
@@ -83,6 +85,12 @@ static void number()
     printf("%g\n", value);
 }
 
+static void grouping()
+{
+    expression();
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+}
+
 typedef enum
 {
     PREC_NONE,
@@ -96,6 +104,7 @@ typedef struct
 } ParseRule;
 
 ParseRule rules[] = {
+    [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
