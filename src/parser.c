@@ -159,6 +159,22 @@ static void unary()
     pushString(tmp);
 }
 
+static void binary()
+{
+    char *opStart = (char *)parser.previous.start;
+    int opLen = parser.previous.length;
+    ParseRule *rule = getRule(parser.previous.type);
+    parsePrecedence((Precedence)(rule->precedence + 1));
+    char *right = popString();
+    char *left = popString();
+    int len = opLen + strlen(left) + strlen(right) + 4;
+    char *tmp = malloc(len + 1);
+    sprintf(tmp, "(%.*s %s %s)", opLen, opStart, left, right);
+    free(left);
+    free(right);
+    pushString(tmp);
+}
+
 static void grouping()
 {
     expression();
@@ -175,6 +191,8 @@ static ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
     [TOKEN_MINUS] = {unary, NULL, PREC_TERM},
     [TOKEN_BANG] = {unary, NULL, PREC_NONE},
+    [TOKEN_SLASH] = {NULL, binary, PREC_FACTOR},
+    [TOKEN_STAR] = {NULL, binary, PREC_FACTOR},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
