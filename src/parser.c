@@ -128,6 +128,14 @@ static void literal()
     pushString(tmp);
 }
 
+static void string()
+{
+    char *tmp = malloc(parser.previous.length - 2 + 1);
+    memcpy(tmp, parser.previous.start + 1, parser.previous.length - 2);
+    tmp[parser.previous.length - 2] = '\0';
+    pushString(tmp);
+}
+
 static void number()
 {
     char buffer[30];
@@ -140,6 +148,7 @@ static void number()
 }
 
 static ParseRule rules[] = {
+    [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
     [TOKEN_NIL] = {literal, NULL, PREC_NONE},
