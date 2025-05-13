@@ -147,6 +147,18 @@ static void number()
     pushString(tmp);
 }
 
+static void unary()
+{
+    char op = parser.previous.start[0];
+    parsePrecedence(PREC_UNARY);
+    char *value = popString();
+    int len = strlen(value) + 4;
+    char *tmp = malloc(len + 1);
+    sprintf(tmp, "(%c %s)", op, value);
+    free(value);
+    pushString(tmp);
+}
+
 static void grouping()
 {
     expression();
@@ -161,6 +173,8 @@ static void grouping()
 
 static ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
+    [TOKEN_MINUS] = {unary, NULL, PREC_TERM},
+    [TOKEN_BANG] = {unary, NULL, PREC_NONE},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
