@@ -147,7 +147,20 @@ static void number()
     pushString(tmp);
 }
 
+static void grouping()
+{
+    expression();
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+    char *expr = popString();
+    int len = strlen(expr) + 8;
+    char *tmp = malloc(len + 1);
+    sprintf(tmp, "(group %s)", expr);
+    free(expr);
+    pushString(tmp);
+}
+
 static ParseRule rules[] = {
+    [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
