@@ -128,7 +128,19 @@ static void literal()
     pushString(tmp);
 }
 
+static void number()
+{
+    char buffer[30];
+    double value = strtod(parser.previous.start, NULL);
+    int len = sprintf(buffer, value == (int)value ? "%.1f" : "%.9g", value);
+    char *tmp = malloc(len + 1);
+    memcpy(tmp, buffer, len);
+    tmp[len] = '\0';
+    pushString(tmp);
+}
+
 static ParseRule rules[] = {
+    [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
     [TOKEN_NIL] = {literal, NULL, PREC_NONE},
     [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
