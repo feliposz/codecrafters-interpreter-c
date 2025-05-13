@@ -123,7 +123,6 @@ Token string()
     }
     if (isAtEnd())
     {
-        fprintf(stderr, "[line %d] Error: Unterminated string.\n", scanner.line);
         return errorToken("Unterminated string.");
     }
     advance();
@@ -286,6 +285,8 @@ Token scanToken()
     case '"':
         return string();
     }
-    fprintf(stderr, "[line %d] Error: Unexpected character: %c\n", scanner.line, c);
-    return errorToken("Unexpected character");
+    // HACK: should alloc a new string?
+    static char buffer[30];
+    sprintf(buffer, "Unexpected character: %c", c);
+    return errorToken(buffer);
 }

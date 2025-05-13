@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/interpreter",
             "args": [
-                "evaluate",
+                "parse",
                 "expr.lox",
             ],
             "stopAtEntry": false,

@@ -163,6 +163,7 @@ bool tokenizer(const char *path)
         printToken(token);
         if (token.type == TOKEN_ERROR)
         {
+            fprintf(stderr, "[line %d] Error: %.*s\n", token.line, token.length, token.start);
             hadError = true;
         }
         if (token.type == TOKEN_EOF)

@@ -20,6 +20,7 @@
         "vm.h": "c",
         "algorithm": "c",
         "random": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "scanner.h": "c"
     }
 }

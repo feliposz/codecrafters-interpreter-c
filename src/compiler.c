@@ -48,13 +48,6 @@ static Chunk *currentChunk()
     return compilingChunk;
 }
 
-static void advance()
-{
-    parser.previous = parser.current;
-    parser.current = scanToken();
-    // TODO: handle TOKEN_ERROR
-}
-
 static void errorAt(Token *token, const char *message)
 {
     if (parser.panicMode)
@@ -87,6 +80,23 @@ static void errorAtCurrent(const char *message)
 static void error(const char *message)
 {
     errorAt(&parser.previous, message);
+}
+
+static void advance()
+{
+    parser.previous = parser.current;
+    for (;;)
+    {
+        parser.current = scanToken();
+        if (parser.current.type == TOKEN_ERROR)
+        {
+            errorAtCurrent(parser.current.start);
+        }
+        else
+        {
+            break;
+        }
+    }
 }
 
 static void consume(TokenType type, const char *message)

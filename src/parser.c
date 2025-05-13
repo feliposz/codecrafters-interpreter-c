@@ -57,12 +57,6 @@ static char *popString()
     return stack[--stackTop];
 }
 
-static void advance()
-{
-    parser.previous = parser.current;
-    parser.current = scanToken();
-}
-
 static void errorAt(Token *token, const char *message)
 {
     if (parser.panicMode)
@@ -95,6 +89,23 @@ static void errorAtCurrent(const char *message)
 static void error(const char *message)
 {
     errorAt(&parser.previous, message);
+}
+
+static void advance()
+{
+    parser.previous = parser.current;
+    for (;;)
+    {
+        parser.current = scanToken();
+        if (parser.current.type == TOKEN_ERROR)
+        {
+            errorAtCurrent(parser.current.start);
+        }
+        else
+        {
+            break;
+        }
+    }
 }
 
 static void consume(TokenType type, const char *message)
@@ -151,6 +162,10 @@ static void unary()
 {
     char op = parser.previous.start[0];
     parsePrecedence(PREC_UNARY);
+    if (parser.hadError)
+    {
+        return;
+    }
     char *value = popString();
     int len = strlen(value) + 4;
     char *tmp = malloc(len + 1);
@@ -165,6 +180,10 @@ static void binary()
     int opLen = parser.previous.length;
     ParseRule *rule = getRule(parser.previous.type);
     parsePrecedence((Precedence)(rule->precedence + 1));
+    if (parser.hadError)
+    {
+        return;
+    }
     char *right = popString();
     char *left = popString();
     int len = opLen + strlen(left) + strlen(right) + 4;
@@ -179,6 +198,10 @@ static void grouping()
 {
     expression();
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+    if (parser.hadError)
+    {
+        return;
+    }
     char *expr = popString();
     int len = strlen(expr) + 8;
     char *tmp = malloc(len + 1);
@@ -248,10 +271,13 @@ bool parse(const char *path)
     initScanner(source);
     advance();
     expression();
-    consume(TOKEN_EOF, "Expect end of expression.");
-    char *result = popString();
-    printf("%s\n", result);
-    free(result);
+    if (!parser.hadError)
+    {
+        consume(TOKEN_EOF, "Expect end of expression.");
+        char *result = popString();
+        printf("%s\n", result);
+        free(result);
+    }
     free(source);
     return parser.hadError;
 }
