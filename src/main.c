@@ -6,6 +6,7 @@
 #include "tokenizer.h"
 
 int evaluate(const char *source);
+bool parse(const char *source);
 void testChunk();
 void testVM();
 
@@ -26,6 +27,14 @@ int main(int argc, char *argv[])
     if (strcmp(command, "tokenize") == 0)
     {
         bool hadError = tokenizer(argv[2]);
+        if (hadError)
+        {
+            exit(65);
+        }
+    }
+    else if (strcmp(command, "parse") == 0)
+    {
+        bool hadError = parse(argv[2]);
         if (hadError)
         {
             exit(65);

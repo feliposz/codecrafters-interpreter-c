@@ -40,8 +40,8 @@ typedef struct
     bool panicMode;
 } Parser;
 
-Parser parser;
-Chunk *compilingChunk;
+static Parser parser;
+static Chunk *compilingChunk;
 
 static Chunk *currentChunk()
 {
@@ -226,7 +226,7 @@ static void grouping()
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
 }
 
-ParseRule rules[] = {
+static ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
     [TOKEN_MINUS] = {unary, binary, PREC_TERM},
     [TOKEN_PLUS] = {NULL, binary, PREC_TERM},

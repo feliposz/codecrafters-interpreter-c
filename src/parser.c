@@ -1,0 +1,184 @@
+// A "Hacky" Parser:
+// just to implement the "Parsing Expressions" stage for the codecrafters tester
+// without implementing the AST classes/printer and reusing the Pratt parser
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "common.h"
+#include "util.h"
+#include "scanner.h"
+
+// these are duplicates of the "real" parser on compiler.c
+
+typedef void (*ParseFn)();
+
+typedef enum
+{
+    PREC_NONE,
+    PREC_EQUALITY,
+    PREC_COMPARISON,
+    PREC_TERM,
+    PREC_FACTOR,
+    PREC_UNARY,
+} Precedence;
+
+typedef struct
+{
+    ParseFn prefix;
+    ParseFn infix;
+    Precedence precedence;
+} ParseRule;
+
+static ParseRule *getRule(TokenType type);
+static void parsePrecedence(Precedence precedence);
+static void expression();
+
+typedef struct
+{
+    Token previous;
+    Token current;
+    bool hadError;
+    bool panicMode;
+} Parser;
+
+static Parser parser;
+
+static char *stack[256];
+static int stackTop = 0;
+
+static void pushString(char *s)
+{
+    stack[stackTop++] = s;
+}
+
+static char *popString()
+{
+    return stack[--stackTop];
+}
+
+static void advance()
+{
+    parser.previous = parser.current;
+    parser.current = scanToken();
+}
+
+static void errorAt(Token *token, const char *message)
+{
+    if (parser.panicMode)
+    {
+        return;
+    }
+    parser.panicMode = true;
+    fprintf(stderr, "[line %d] Error", token->line);
+    if (token->type == TOKEN_EOF)
+    {
+        fprintf(stderr, " at end");
+    }
+    else if (token->type == TOKEN_ERROR)
+    {
+        // nothing
+    }
+    else
+    {
+        fprintf(stderr, " at '%.*s'", token->length, token->start);
+    }
+    fprintf(stderr, ": %s\n", message);
+    parser.hadError = true;
+}
+
+static void errorAtCurrent(const char *message)
+{
+    errorAt(&parser.current, message);
+}
+
+static void error(const char *message)
+{
+    errorAt(&parser.previous, message);
+}
+
+static void consume(TokenType type, const char *message)
+{
+    if (parser.current.type != type)
+    {
+        errorAtCurrent(message);
+        return;
+    }
+    advance();
+}
+
+static void literal()
+{
+    // need to duplicate literals because we free pointers as we pop them from the stack
+    char *tmp = malloc(6);
+    switch (parser.previous.type)
+    {
+    case TOKEN_NIL:
+        sprintf(tmp, "nil");
+        break;
+    case TOKEN_FALSE:
+        sprintf(tmp, "false");
+        break;
+    case TOKEN_TRUE:
+        sprintf(tmp, "true");
+        break;
+    default:
+        return; // unreachable
+    }
+    pushString(tmp);
+}
+
+static ParseRule rules[] = {
+    [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
+    [TOKEN_NIL] = {literal, NULL, PREC_NONE},
+    [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
+};
+
+static ParseRule *getRule(TokenType type)
+{
+    return &rules[type];
+}
+
+static void parsePrecedence(Precedence precedence)
+{
+    advance();
+    ParseFn prefixRule = getRule(parser.previous.type)->prefix;
+    if (prefixRule == NULL)
+    {
+        error("Expect expression");
+        return;
+    }
+    prefixRule();
+
+    while (precedence <= getRule(parser.current.type)->precedence)
+    {
+        advance();
+        ParseFn infixRule = getRule(parser.previous.type)->infix;
+        infixRule();
+    }
+}
+
+static void expression()
+{
+    parsePrecedence(PREC_EQUALITY);
+}
+
+bool parse(const char *path)
+{
+    parser.hadError = false;
+    parser.panicMode = false;
+    char *source = readFile(path);
+    if (source == NULL)
+    {
+        return false;
+    }
+    initScanner(source);
+    advance();
+    expression();
+    consume(TOKEN_EOF, "Expect end of expression.");
+    char *result = popString();
+    printf("%s\n", result);
+    free(result);
+    free(source);
+    return parser.hadError;
+}
