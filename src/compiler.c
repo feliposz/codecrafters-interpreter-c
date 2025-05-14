@@ -32,6 +32,7 @@ typedef struct
 static ParseRule *getRule(TokenType type);
 static void parsePrecedence(Precedence precedence);
 static void expression();
+static void declaration();
 
 typedef struct
 {
@@ -344,11 +345,24 @@ static void printStatement()
     emitByte(OP_PRINT);
 }
 
+static void block()
+{
+    while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF))
+    {
+        declaration();
+    }
+    consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
+}
+
 static void statement()
 {
     if (match(TOKEN_PRINT))
     {
         printStatement();
+    }
+    else if (match(TOKEN_LEFT_BRACE))
+    {
+        block();
     }
     else
     {
