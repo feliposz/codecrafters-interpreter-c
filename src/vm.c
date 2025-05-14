@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include "common.h"
 #include "vm.h"
 #include "debug.h"
@@ -29,9 +30,13 @@ void freeVM()
     freeObjects();
 }
 
-static void runtimeError(const char *message)
+static void runtimeError(const char *format, ...)
 {
-    fprintf(stderr, "%s\n", message);
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+    fprintf(stderr, "\n");
     size_t offset = vm.ip - vm.chunk->code - 1;
     int line = vm.chunk->lines[offset];
     fprintf(stderr, "[line %d] in script\n", line);
@@ -193,18 +198,18 @@ static InterpretResult run()
             pop();
             break;
         }
-         case OP_GET_GLOBAL:
+        case OP_GET_GLOBAL:
         {
             ObjString *name = READ_STRING();
             Value value;
             if (!tableGet(&vm.globals, name, &value))
             {
-                runtimeError("Undefined variable.");
+                runtimeError("Undefined variable '%s'.", name->chars);
                 return INTERPRET_RUNTIME_ERROR;
             }
             push(value);
             break;
-        }        
+        }
         case OP_PRINT:
             printValue(pop());
             printf("\n");
