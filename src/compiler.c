@@ -180,6 +180,22 @@ static void string()
     emitConstant(OBJ_VAL(objString));
 }
 
+static uint8_t identifierConstant(Token *name)
+{
+    return makeConstant(OBJ_VAL(copyString((char *)name->start, name->length)));
+}
+
+static void namedVariable(Token *name)
+{
+    uint8_t arg = identifierConstant(name);
+    emitBytes(OP_GET_GLOBAL, arg);
+}
+
+static void variable()
+{
+    namedVariable(&parser.previous);
+}
+
 static void number()
 {
     double value = strtod(parser.previous.start, NULL);
@@ -264,6 +280,7 @@ static ParseRule rules[] = {
     [TOKEN_LESS_EQUAL] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_SLASH] = {NULL, binary, PREC_FACTOR},
     [TOKEN_STAR] = {NULL, binary, PREC_FACTOR},
+    [TOKEN_IDENTIFIER] = {variable, NULL, PREC_NONE},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
@@ -353,9 +370,42 @@ static void synchronize()
     }
 }
 
+static uint8_t parseVariable(const char *errorMessage)
+{
+    consume(TOKEN_IDENTIFIER, errorMessage);
+    return identifierConstant(&parser.previous);
+}
+
+static void defineVariable(uint8_t global)
+{
+    emitBytes(OP_DEFINE_GLOBAL, global);
+}
+
+static void varDeclaration()
+{
+    uint8_t global = parseVariable("Expect variable name.");
+    if (match(TOKEN_EQUAL))
+    {
+        expression();
+    }
+    else
+    {
+        emitByte(OP_NIL);
+    }
+    consume(TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
+    defineVariable(global);
+}
+
 static void declaration()
 {
-    statement();
+    if (match(TOKEN_VAR))
+    {
+        varDeclaration();
+    }
+    else
+    {
+        statement();
+    }
     if (parser.panicMode)
     {
         synchronize();
