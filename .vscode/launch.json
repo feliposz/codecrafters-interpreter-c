@@ -10,7 +10,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/interpreter",
             "args": [
-                "testhash",
+                "run",
+                "test.lox"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

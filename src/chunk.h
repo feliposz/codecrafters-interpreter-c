@@ -24,6 +24,7 @@ typedef enum
     OP_EQUAL,
     OP_NOT_EQUAL,
     OP_PRINT,
+    OP_POP,
 } OpCode;
 
 typedef struct
