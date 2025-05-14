@@ -22,5 +22,6 @@ void freeTable(Table *table);
 bool tableSet(Table *table, ObjString *key, Value value);
 bool tableGet(Table *table, ObjString *key, Value *value);
 bool tableDelete(Table *table, ObjString *key);
+ObjString *tableFindString(Table *table, char *chars, int length, uint32_t hash);
 
 #endif

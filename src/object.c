@@ -4,6 +4,7 @@
 #include "memory.h"
 #include "object.h"
 #include "vm.h"
+#include "table.h"
 
 #define ALLOCATE_OBJ(type, objectType) \
     (type *)allocateObject(sizeof(type), objectType)
@@ -23,6 +24,7 @@ ObjString *allocateString(char *chars, int length, uint32_t hash)
     string->length = length;
     string->chars = chars;
     string->hash = hash;
+    tableSet(&vm.strings, string, NIL_VAL);
     return string;
 }
 
@@ -40,6 +42,11 @@ static uint32_t hashString(char *key, int length)
 ObjString *copyString(char *chars, int length)
 {
     uint32_t hash = hashString(chars, length);
+    ObjString *interned = tableFindString(&vm.strings, chars, length, hash);
+    if (interned != NULL)
+    {
+        return interned;
+    }
     char *heapChars = ALLOCATE(char, length + 1);
     memcpy(heapChars, chars, length);
     heapChars[length] = '\0';
@@ -49,6 +56,12 @@ ObjString *copyString(char *chars, int length)
 ObjString *takeString(char *chars, int length)
 {
     uint32_t hash = hashString(chars, length);
+    ObjString *interned = tableFindString(&vm.strings, chars, length, hash);
+    if (interned != NULL)
+    {
+        FREE_ARRAY(char, chars, length + 1);
+        return interned;
+    }
     return allocateString(chars, length, hash);
 }
 

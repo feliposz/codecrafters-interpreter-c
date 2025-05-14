@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "memory.h"
 #include "table.h"
 
@@ -44,6 +45,33 @@ static Entry *findEntry(Entry *entries, int capacity, ObjString *key)
             return entry;
         }
         index = (index + 1) % capacity;
+    }
+    return NULL; // unreachable
+}
+
+ObjString *tableFindString(Table *table, char *chars, int length, uint32_t hash)
+{
+    if (table->count == 0)
+    {
+        return NULL;
+    }
+    uint32_t index = hash % table->capacity;
+    for (;;)
+    {
+        Entry *entry = &table->entries[index];
+        if (entry->key == NULL)
+        {
+            if (IS_NIL(entry->value)) // truly empty (means key wasn't found)
+            {
+                return NULL;
+            }
+        }
+        else if (entry->key->length == length && entry->key->hash == hash &&
+                 memcmp(entry->key->chars, chars, length) == 0)
+        {
+            return entry->key;
+        }
+        index = (index + 1) % table->capacity;
     }
     return NULL; // unreachable
 }
@@ -128,23 +156,25 @@ void testHashTable()
     Table table;
     initVM(); // only to keep track of string objects
     initTable(&table);
-    ObjString *key = copyString("key", 3);
-    if (tableSet(&table, key, NUMBER_VAL(12345)))
+    ObjString *keyA = copyString("key", 3);
+    ObjString *keyB = copyString("key", 3);
+    printf("string interning check: %p %p %s\n", keyA, keyB, keyA == keyB ? "ok" : "fail");
+    if (tableSet(&table, keyA, NUMBER_VAL(12345)))
     {
         Value value;
-        if (tableGet(&table, key, &value))
+        if (tableGet(&table, keyB, &value))
         {
-            printf("found value for '%.*s': ", key->length, key->chars);
+            printf("found value for '%.*s': ", keyB->length, keyB->chars);
             printValue(value);
             printf("\n");
         }
-        if (tableDelete(&table, key))
+        if (tableDelete(&table, keyB))
         {
             printf("deleted\n");
         }
-        if (tableGet(&table, key, &value))
+        if (tableGet(&table, keyB, &value))
         {
-            printf("key '%.*s' not found.\n", key->length, key->chars);
+            printf("key '%.*s' not found.\n", keyB->length, keyB->chars);
         }
     }
     freeTable(&table);

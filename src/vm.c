@@ -17,11 +17,13 @@ static void resetStack()
 void initVM()
 {
     resetStack();
+    initTable(&vm.strings);
     vm.objects = NULL;
 }
 
 void freeVM()
 {
+    freeTable(&vm.strings);
     freeObjects();
 }
 
@@ -67,33 +69,6 @@ static void concatenate()
     chars[length] = '\0';
     ObjString *result = takeString(chars, length);
     push(OBJ_VAL(result));
-}
-
-static bool valuesEqual(Value a, Value b)
-{
-    if (a.type != b.type)
-    {
-        return false;
-    }
-    switch (a.type)
-    {
-    case VAL_NIL:
-        return true;
-    case VAL_BOOL:
-        return AS_BOOL(a) == AS_BOOL(b);
-    case VAL_NUMBER:
-        return AS_NUMBER(a) == AS_NUMBER(b);
-    case VAL_OBJ:
-    {
-        ObjString *aString = AS_STRING(a);
-        ObjString *bString = AS_STRING(b);
-        return aString->length == bString->length &&
-               memcmp(aString->chars, bString->chars, aString->length) == 0;
-        break;
-    }
-    default:
-        return false; // unreachable
-    }
 }
 
 static InterpretResult run()
