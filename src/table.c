@@ -92,7 +92,7 @@ void adjustCapacity(Table *table, int newCapacity)
         {
             continue;
         }
-        Entry *dest = findEntry(newEntries, newCapacity, table->entries->key);
+        Entry *dest = findEntry(newEntries, newCapacity, orig->key);
         dest->key = orig->key;
         dest->value = orig->value;
         table->count++;
