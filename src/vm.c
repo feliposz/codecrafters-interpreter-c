@@ -178,18 +178,14 @@ static InterpretResult run()
             break;
         }
         case OP_CONSTANT:
-        {
-            Value constant = READ_CONSTANT();
-            push(constant);
+            push(READ_CONSTANT());
             break;
-        }
-        case OP_RETURN:
-        {
-            Value value = pop();
-            printValue(value);
+        case OP_PRINT:
+            printValue(pop());
             printf("\n");
+            break;
+        case OP_RETURN:
             return INTERPRET_OK;
-        }
         default:
             fprintf(stderr, "instruction not implemented: %d\n", instruction);
             exit(1);

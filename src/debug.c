@@ -64,6 +64,8 @@ int disassembleInstruction(Chunk *chunk, int offset)
         return simpleInstruction("OP_EQUAL", offset);
     case OP_NOT_EQUAL:
         return simpleInstruction("OP_NOT_EQUAL", offset);
+    case OP_PRINT:
+        return simpleInstruction("OP_PRINT", offset);
     default:
         printf("Unknown opcode %d\n", instruction);
         return offset + 1;

@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "common.h"
-#include "tokenizer.h"
 
-int evaluate(const char *source);
-bool parse(const char *source);
+void tokenize(const char *path);
+void parse(const char *path);
+void evaluate(const char *path, bool singleExpression);
 void testChunk();
 void testVM();
 void testHashTable();
@@ -19,7 +18,7 @@ int main(int argc, char *argv[])
 
     if (argc < 2)
     {
-        fprintf(stderr, "Usage: ./your_program <mode> [<filename>]\n");
+        fprintf(stderr, "Usage: ./your_program <command> [<filename>]\n");
         return 1;
     }
 
@@ -27,27 +26,19 @@ int main(int argc, char *argv[])
 
     if (strcmp(command, "tokenize") == 0)
     {
-        bool hadError = tokenizer(argv[2]);
-        if (hadError)
-        {
-            exit(65);
-        }
+        tokenize(argv[2]);
     }
     else if (strcmp(command, "parse") == 0)
     {
-        bool hadError = parse(argv[2]);
-        if (hadError)
-        {
-            exit(65);
-        }
+        parse(argv[2]);
     }
     else if (strcmp(command, "evaluate") == 0)
     {
-        int errorCode = evaluate(argv[2]);
-        if (errorCode)
-        {
-            exit(errorCode);
-        }
+        evaluate(argv[2], true);
+    }
+    else if (strcmp(command, "run") == 0)
+    {
+        evaluate(argv[2], false);
     }
     else if (strcmp(command, "testchunk") == 0)
     {

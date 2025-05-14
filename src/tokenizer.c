@@ -4,7 +4,6 @@
 #include "common.h"
 #include "util.h"
 #include "scanner.h"
-#include "tokenizer.h"
 
 void printToken(Token token)
 {
@@ -147,14 +146,10 @@ void printToken(Token token)
     printf("%s %.*s %.*s\n", desc, token.length, token.start, valueLength, valueString);
 }
 
-bool tokenizer(const char *path)
+void tokenize(const char *path)
 {
     bool hadError = false;
     char *source = readFile(path);
-    if (source == NULL)
-    {
-        return true;
-    }
     initScanner(source);
     int line = -1;
     for (;;)
@@ -172,5 +167,8 @@ bool tokenizer(const char *path)
         }
     }
     free(source);
-    return hadError;
+    if (hadError)
+    {
+        exit(65);
+    }
 }

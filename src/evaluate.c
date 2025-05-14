@@ -3,20 +3,16 @@
 #include "vm.h"
 #include "util.h"
 
-bool compile(const char *source, Chunk *chunk);
+bool compile(const char *source, Chunk *chunk, bool singleExpression);
 
-int evaluate(const char *path)
+void evaluate(const char *path, bool singleExpression)
 {
     Chunk chunk;
     initChunk(&chunk);
     char *source = readFile(path);
-    if (source == NULL)
-    {
-        return false;
-    }
     int errorCode = 0;
     initVM();
-    if (compile(source, &chunk))
+    if (compile(source, &chunk, singleExpression))
     {
         InterpretResult result = interpret(&chunk);
         if (result == INTERPRET_RUNTIME_ERROR)
@@ -31,5 +27,8 @@ int evaluate(const char *path)
     freeVM();
     free(source);
     freeChunk(&chunk);
-    return errorCode;
+    if (errorCode != 0)
+    {
+        exit(errorCode);
+    }
 }

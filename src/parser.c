@@ -259,15 +259,11 @@ static void expression()
     parsePrecedence(PREC_EQUALITY);
 }
 
-bool parse(const char *path)
+void parse(const char *path)
 {
     parser.hadError = false;
     parser.panicMode = false;
     char *source = readFile(path);
-    if (source == NULL)
-    {
-        return false;
-    }
     initScanner(source);
     advance();
     expression();
@@ -279,5 +275,8 @@ bool parse(const char *path)
         free(result);
     }
     free(source);
-    return parser.hadError;
+    if (parser.hadError)
+    {
+        exit(65);
+    }
 }
