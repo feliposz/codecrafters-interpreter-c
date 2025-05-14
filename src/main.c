@@ -9,6 +9,7 @@ int evaluate(const char *source);
 bool parse(const char *source);
 void testChunk();
 void testVM();
+void testHashTable();
 
 int main(int argc, char *argv[])
 {
@@ -55,6 +56,10 @@ int main(int argc, char *argv[])
     else if (strcmp(command, "testvm") == 0)
     {
         testVM();
+    }
+    else if (strcmp(command, "testhash") == 0)
+    {
+        testHashTable();
     }
     else
     {
