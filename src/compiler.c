@@ -17,6 +17,7 @@ typedef enum
     PREC_NONE,
     PREC_ASSIGNMENT,
     PREC_OR,
+    PREC_AND,
     PREC_EQUALITY,
     PREC_COMPARISON,
     PREC_TERM,
@@ -442,6 +443,14 @@ static void logicalOr(bool canAssign)
     patchJump(endJump);
 }
 
+static void logicalAnd(bool canAssign)
+{
+    int endJump = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP);
+    parsePrecedence(PREC_AND);
+    patchJump(endJump);
+}
+
 static ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
     [TOKEN_MINUS] = {unary, binary, PREC_TERM},
@@ -459,6 +468,7 @@ static ParseRule rules[] = {
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_OR] = {NULL, logicalOr, PREC_OR},
+    [TOKEN_AND] = {NULL, logicalAnd, PREC_AND},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
     [TOKEN_NIL] = {literal, NULL, PREC_NONE},
     [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
