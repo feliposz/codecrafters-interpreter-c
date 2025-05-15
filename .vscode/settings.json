@@ -21,6 +21,7 @@
         "algorithm": "c",
         "random": "c",
         "stdio.h": "c",
-        "scanner.h": "c"
+        "scanner.h": "c",
+        "typeinfo": "c"
     }
 }

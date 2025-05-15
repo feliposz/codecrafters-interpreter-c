@@ -55,6 +55,11 @@ static Value pop()
     return *vm.stackTop;
 }
 
+static void popN(int n)
+{
+    vm.stackTop -= n;
+}
+
 static Value peek(int distance)
 {
     return *(vm.stackTop - distance - 1);
@@ -95,6 +100,10 @@ static InterpretResult run()
         push(valueType(a op b));                        \
     }
 
+#ifdef DEBUG_TRACE_EXECUTION
+    printf("=== trace execution ===\n");
+#endif
+
     for (;;)
     {
 #ifdef DEBUG_TRACE_EXECUTION
@@ -122,6 +131,9 @@ static InterpretResult run()
             break;
         case OP_POP:
             pop();
+            break;
+        case OP_POPN:
+            popN(READ_BYTE());
             break;
         case OP_NEGATE:
             if (!IS_NUMBER(peek(0)))
@@ -221,6 +233,19 @@ static InterpretResult run()
                 return INTERPRET_RUNTIME_ERROR;
             }
             // leave the value on the stack. Ex: a = (b = 1)
+            break;
+        }
+        case OP_GET_LOCAL:
+        {
+            uint8_t slot = READ_BYTE();
+            push(vm.stack[slot]);
+            break;
+        }
+        case OP_SET_LOCAL:
+        {
+            uint8_t slot = READ_BYTE();
+            vm.stack[slot] = peek(0);
+            // leave the value on the stack
             break;
         }
         case OP_PRINT:
