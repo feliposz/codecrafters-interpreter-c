@@ -34,6 +34,7 @@ static ParseRule *getRule(TokenType type);
 static void parsePrecedence(Precedence precedence);
 static void expression();
 static void declaration();
+static void statement();
 
 #define LOCAL_UNDEFINED -1
 
@@ -173,6 +174,26 @@ static void emitConstant(Value value)
 static void emitReturn()
 {
     emitByte(OP_RETURN);
+}
+
+static int emitJump(uint8_t instruction)
+{
+    emitByte(instruction);
+    emitByte(0xFF); // -2 places offset here
+    emitByte(0xFF);
+    return currentChunk()->count - 2;
+}
+
+static void patchJump(int offset)
+{
+    // account for the offset itself
+    int jump = currentChunk()->count - offset - 2;
+    if (jump > UINT16_MAX)
+    {
+        error("Too much code to jump over.");
+    }
+    compilingChunk->code[offset + 0] = (jump >> 8) & 0xFF;
+    compilingChunk->code[offset + 1] = jump & 0xFF;
 }
 
 static void initCompiler(Compiler *compiler)
@@ -487,6 +508,19 @@ static void block()
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
 }
 
+static void ifStatement()
+{
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
+    expression();
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+    int thenJump = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP); // if true, pop value before statement
+    statement();
+    emitByte(OP_NIL); // dummy value for pop below
+    patchJump(thenJump);
+    emitByte(OP_POP); // if false lands here
+}
+
 static void statement()
 {
     if (match(TOKEN_PRINT))
@@ -498,6 +532,10 @@ static void statement()
         beginScope();
         block();
         endScope();
+    }
+    else if (match(TOKEN_IF))
+    {
+        ifStatement();
     }
     else
     {
