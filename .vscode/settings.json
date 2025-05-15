@@ -22,6 +22,7 @@
         "random": "c",
         "stdio.h": "c",
         "scanner.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "compare": "c"
     }
 }

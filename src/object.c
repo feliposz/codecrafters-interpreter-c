@@ -72,9 +72,19 @@ void printObject(Value value)
     case OBJ_STRING:
         printf("%s", AS_CSTRING(value));
         break;
+    case OBJ_NATIVE:
+        printf("<native fn>");
+        break;
     default:
-        printf("type not implemented: %d", value.type);
+        printf("object type not implemented: %d\n", value.type);
         exit(1);
         break;
     }
+}
+
+ObjNative *newNative(NativeFn function)
+{
+    ObjNative *native = ALLOCATE_OBJ(ObjNative, OBJ_NATIVE);
+    native->function = function;
+    return native;
 }

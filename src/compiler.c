@@ -23,6 +23,7 @@ typedef enum
     PREC_TERM,
     PREC_FACTOR,
     PREC_UNARY,
+    PREC_CALL,
 } Precedence;
 
 typedef struct
@@ -463,8 +464,14 @@ static void logicalAnd(bool canAssign)
     patchJump(endJump);
 }
 
+static void call(bool canAssign)
+{
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after arguments.");
+    emitBytes(OP_CALL, 0);
+}
+
 static ParseRule rules[] = {
-    [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
+    [TOKEN_LEFT_PAREN] = {grouping, call, PREC_CALL},
     [TOKEN_MINUS] = {unary, binary, PREC_TERM},
     [TOKEN_PLUS] = {NULL, binary, PREC_TERM},
     [TOKEN_BANG] = {unary, NULL, PREC_NONE},

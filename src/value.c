@@ -40,13 +40,13 @@ void printValue(Value value)
         printf("%s", AS_BOOL(value) ? "true" : "false");
         break;
     case VAL_NUMBER:
-        printf("%g", AS_NUMBER(value));
+        printf("%.16g", AS_NUMBER(value));
         break;
     case VAL_OBJ:
         printObject(value);
         break;
     default:
-        printf("type not implemented: %d", value.type);
+        printf("value type not implemented: %d\n", value.type);
         exit(1);
         break;
     }

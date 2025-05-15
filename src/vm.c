@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <time.h>
 #include "common.h"
 #include "vm.h"
 #include "debug.h"
@@ -13,21 +14,6 @@ VM vm;
 static void resetStack()
 {
     vm.stackTop = vm.stack;
-}
-
-void initVM()
-{
-    resetStack();
-    initTable(&vm.globals);
-    initTable(&vm.strings);
-    vm.objects = NULL;
-}
-
-void freeVM()
-{
-    freeTable(&vm.globals);
-    freeTable(&vm.strings);
-    freeObjects();
 }
 
 static void runtimeError(const char *format, ...)
@@ -65,6 +51,38 @@ static Value peek(int distance)
     return *(vm.stackTop - distance - 1);
 }
 
+static Value clockNative(int argCount, Value *args)
+{
+    return NUMBER_VAL((double)time(NULL));
+}
+
+static void defineNative(char *name, NativeFn function)
+{
+    // push/pop these values to avoid the GC (when it's implemented)
+    // to collect them while they are being used
+    push(OBJ_VAL(copyString(name, strlen(name))));
+    push(OBJ_VAL(newNative(function)));
+    tableSet(&vm.globals, AS_STRING(vm.stack[0]), vm.stack[1]);
+    pop();
+    pop();
+}
+
+void initVM()
+{
+    resetStack();
+    initTable(&vm.globals);
+    initTable(&vm.strings);
+    defineNative("clock", clockNative);
+    vm.objects = NULL;
+}
+
+void freeVM()
+{
+    freeTable(&vm.globals);
+    freeTable(&vm.strings);
+    freeObjects();
+}
+
 static bool isFalsey(Value value)
 {
     return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
@@ -81,6 +99,28 @@ static void concatenate()
     chars[length] = '\0';
     ObjString *result = takeString(chars, length);
     push(OBJ_VAL(result));
+}
+
+static bool callValue(Value callee, int argCount)
+{
+    if (IS_OBJ(callee))
+    {
+        switch (OBJ_TYPE(callee))
+        {
+        case OBJ_NATIVE:
+        {
+            NativeFn native = AS_NATIVE(callee);
+            Value result = native(argCount, vm.stackTop - argCount);
+            vm.stackTop -= argCount + 1;
+            push(result);
+            return true;
+        }
+        default:
+            break;
+        }
+    }
+    runtimeError("Can only call functions and classes.");
+    return false;
 }
 
 static InterpretResult run()
@@ -272,6 +312,16 @@ static InterpretResult run()
         {
             uint16_t offset = READ_SHORT();
             vm.ip -= offset;
+            break;
+        }
+        case OP_CALL:
+        {
+            int argCount = READ_BYTE();
+            Value function = peek(argCount);
+            if (!callValue(function, argCount))
+            {
+                return INTERPRET_RUNTIME_ERROR;
+            }
             break;
         }
         case OP_RETURN:
