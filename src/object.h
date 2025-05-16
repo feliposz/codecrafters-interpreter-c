@@ -11,6 +11,7 @@ typedef enum
     OBJ_NATIVE,
     OBJ_FUNCTION,
     OBJ_CLOSURE,
+    OBJ_UPVALUE,
 } ObjType;
 
 struct Obj
@@ -47,7 +48,15 @@ typedef struct
 typedef struct
 {
     Obj obj;
+    Value *location;
+} ObjUpvalue;
+
+typedef struct
+{
+    Obj obj;
     ObjFunction *function;
+    ObjUpvalue **upvalues;
+    int upvalueCount;
 } ObjClosure;
 
 #define OBJ_TYPE(value) (AS_OBJ(value)->type)
@@ -71,5 +80,6 @@ void printObject(Value value);
 ObjNative *newNative(NativeFn function);
 ObjFunction *newFunction();
 ObjClosure *newClosure(ObjFunction *function);
+ObjUpvalue *newUpvalue(Value *slot);
 
 #endif
