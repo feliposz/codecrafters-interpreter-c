@@ -41,6 +41,12 @@ static void statement();
 
 #define LOCAL_UNDEFINED -1
 
+typedef enum
+{
+    TYPE_FUNCTION,
+    TYPE_SCRIPT,
+} FunctionType;
+
 typedef struct
 {
     Token name;
@@ -49,6 +55,8 @@ typedef struct
 
 typedef struct
 {
+    ObjFunction *function;
+    FunctionType type;
     Local locals[UINT8_COUNT];
     int localCount;
     int scopeDepth;
@@ -64,11 +72,10 @@ typedef struct
 
 static Parser parser;
 static Compiler *current = NULL;
-static Chunk *compilingChunk = NULL;
 
 static Chunk *currentChunk()
 {
-    return compilingChunk;
+    return &current->function->chunk;
 }
 
 static void errorAt(Token *token, const char *message)
@@ -207,26 +214,36 @@ static void patchJump(int offset)
     {
         error("Too much code to jump over.");
     }
-    compilingChunk->code[offset + 0] = (jump >> 8) & 0xFF;
-    compilingChunk->code[offset + 1] = jump & 0xFF;
+    currentChunk()->code[offset + 0] = (jump >> 8) & 0xFF;
+    currentChunk()->code[offset + 1] = jump & 0xFF;
 }
 
-static void initCompiler(Compiler *compiler)
+static void initCompiler(Compiler *compiler, FunctionType type)
 {
+    compiler->function = NULL;
+    compiler->type = type;
     compiler->localCount = 0;
     compiler->scopeDepth = 0;
+    compiler->function = newFunction();
     current = compiler;
+    // reserve slot 1
+    Local *local = &current->locals[current->localCount++];
+    local->depth = 0;
+    local->name.start = "";
+    local->name.length = 0;
 }
 
-static void endCompiler()
+static ObjFunction *endCompiler()
 {
     emitReturn();
+    ObjFunction *function = current->function;
 #ifdef DEBUG_PRINT_CODE
     if (!parser.hadError)
     {
-        disassembleChunk(currentChunk(), "code");
+        disassembleChunk(currentChunk(), function->name != NULL ? function->name->chars : "<script>");
     }
 #endif
+    return function;
 }
 
 static void beginScope()
@@ -747,28 +764,18 @@ static void declaration()
     }
 }
 
-bool compile(const char *source, Chunk *chunk, bool singleExpression)
+ObjFunction *compile(const char *source)
 {
     parser.hadError = false;
     parser.panicMode = false;
-    compilingChunk = chunk;
     initScanner(source);
     Compiler compiler;
-    initCompiler(&compiler);
+    initCompiler(&compiler, TYPE_SCRIPT);
     advance();
-    if (singleExpression)
+    while (!match(TOKEN_EOF))
     {
-        expression();
-        emitByte(OP_PRINT);
-        consume(TOKEN_EOF, "Expect end of expression.");
+        declaration();
     }
-    else
-    {
-        while (!match(TOKEN_EOF))
-        {
-            declaration();
-        }
-    }
-    endCompiler();
-    return !parser.hadError;
+    ObjFunction *function = endCompiler();
+    return parser.hadError ? NULL : function;
 }

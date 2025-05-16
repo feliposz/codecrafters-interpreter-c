@@ -2,12 +2,14 @@
 #define clox_object_h
 
 #include "common.h"
+#include "chunk.h"
 #include "value.h"
 
 typedef enum
 {
     OBJ_STRING,
     OBJ_NATIVE,
+    OBJ_FUNCTION,
 } ObjType;
 
 struct Obj
@@ -24,11 +26,29 @@ struct ObjString
     uint32_t hash;
 };
 
+typedef Value (*NativeFn)(int argCount, Value *args);
+
+typedef struct
+{
+    Obj obj;
+    NativeFn function;
+} ObjNative;
+
+typedef struct
+{
+    Obj obj;
+    int arity;
+    Chunk chunk;
+    ObjString *name;
+} ObjFunction;
+
 #define OBJ_TYPE(value) (AS_OBJ(value)->type)
 #define IS_STRING(value) isObjType(value, OBJ_STRING)
+#define IS_FUNCTION(value) isObjType(value, OBJ_FUNCTION)
 #define AS_STRING(value) ((ObjString *)AS_OBJ(value))
 #define AS_CSTRING(value) (((ObjString *)AS_OBJ(value))->chars)
 #define AS_NATIVE(value) (((ObjNative *)AS_OBJ(value))->function)
+#define AS_FUNCTION(value) ((ObjFunction *)AS_OBJ(value))
 
 static inline bool isObjType(Value value, ObjType type)
 {
@@ -38,15 +58,7 @@ static inline bool isObjType(Value value, ObjType type)
 ObjString *copyString(char *chars, int length);
 ObjString *takeString(char *chars, int length);
 void printObject(Value value);
-
-typedef Value (*NativeFn)(int argCount, Value *args);
-
-typedef struct
-{
-    Obj obj;
-    NativeFn function;
-} ObjNative;
-
 ObjNative *newNative(NativeFn function);
+ObjFunction *newFunction();
 
 #endif

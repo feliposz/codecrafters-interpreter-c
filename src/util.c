@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 #include "common.h"
 #include "util.h"
+#include "vm.h"
 
 char *readFile(const char *path)
 {
@@ -38,4 +39,37 @@ char *readFile(const char *path)
     fclose(file);
 
     return buffer;
+}
+
+static void run(char *source)
+{
+    int errorCode = 0;
+    initVM();
+    InterpretResult result = interpret(source);
+    freeVM();
+    free(source);
+    switch (result)
+    {
+    case INTERPRET_RUNTIME_ERROR:
+        exit(70);
+        break;
+    case INTERPRET_COMPILE_ERROR:
+        exit(65);
+        break;
+    }
+}
+
+void runFile(const char *path)
+{
+    char *source = readFile(path);
+    run(source);
+}
+
+void evaluate(const char *path)
+{
+    char *source = readFile(path);
+    char *script = malloc(strlen(source) + 10);
+    sprintf(script, "print %s;\n", source);
+    free(source);
+    run(script);
 }

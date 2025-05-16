@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "common.h"
+#include "util.h"
 
 void tokenize(const char *path);
 void parse(const char *path);
-void evaluate(const char *path, bool singleExpression);
 void testChunk();
 void testVM();
 void testHashTable();
@@ -34,11 +34,11 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(command, "evaluate") == 0)
     {
-        evaluate(argv[2], true);
+        evaluate(argv[2]);
     }
     else if (strcmp(command, "run") == 0)
     {
-        evaluate(argv[2], false);
+        runFile(argv[2]);
     }
     else if (strcmp(command, "testchunk") == 0)
     {

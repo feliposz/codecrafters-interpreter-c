@@ -40,7 +40,7 @@ void printValue(Value value)
         printf("%s", AS_BOOL(value) ? "true" : "false");
         break;
     case VAL_NUMBER:
-        printf("%.16g", AS_NUMBER(value));
+        printf("%.15g", AS_NUMBER(value));
         break;
     case VAL_OBJ:
         printObject(value);

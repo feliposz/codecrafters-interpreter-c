@@ -158,7 +158,7 @@ void testHashTable()
     initTable(&table);
     ObjString *keyA = copyString("key", 3);
     ObjString *keyB = copyString("key", 3);
-    printf("string interning check: %p %p %s\n", keyA, keyB, keyA == keyB ? "ok" : "fail");
+    printf("string interning check: %s\n", keyA == keyB ? "ok" : "fail");
     if (tableSet(&table, keyA, NUMBER_VAL(12345)))
     {
         Value value;
