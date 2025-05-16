@@ -489,10 +489,29 @@ static void logicalAnd(bool canAssign)
     patchJump(endJump);
 }
 
+static int argumentList()
+{
+    int argCount = 0;
+    if (!check(TOKEN_RIGHT_PAREN))
+    {
+        do
+        {
+            expression();
+            if (argCount == 255)
+            {
+                error("Can't have more than 255 arguments.");
+            }
+            argCount++;
+        } while (match(TOKEN_COMMA));
+    }
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after arguments.");
+    return argCount;
+}
+
 static void call(bool canAssign)
 {
-    consume(TOKEN_RIGHT_PAREN, "Expect ')' after arguments.");
-    emitBytes(OP_CALL, 0);
+    int argCount = argumentList();
+    emitBytes(OP_CALL, argCount);
 }
 
 static ParseRule rules[] = {
@@ -766,6 +785,18 @@ static void function(FunctionType type)
     initCompiler(&compiler, type);
     beginScope();
     consume(TOKEN_LEFT_PAREN, "Expect '(' after function name.");
+    if (!check(TOKEN_RIGHT_PAREN))
+    {
+        do {
+            current->function->arity++;
+            if (current->function->arity > 255)
+            {
+                errorAtCurrent("Can't have more than 255 parameters.");
+            }
+            uint8_t constant = parseVariable("Expect parameter name.");
+            defineVariable(constant);
+        } while (match(TOKEN_COMMA));
+    }
     consume(TOKEN_RIGHT_PAREN, "Expect ') after parameters.");
     consume(TOKEN_LEFT_BRACE, "Expect '{' before function body.");
     block();
