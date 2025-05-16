@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/build/interpreter",
             "args": [
                 "run",
-                "test.lox"
+                "tests/fun.lox"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

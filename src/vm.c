@@ -105,6 +105,15 @@ static void concatenate()
     push(OBJ_VAL(result));
 }
 
+static bool call(ObjFunction *function, int argCount)
+{
+    CallFrame *frame = &vm.frames[vm.frameCount++];
+    frame->function = function;
+    frame->ip = function->chunk.code;
+    frame->slots = vm.stackTop - argCount - 1;
+    return true;
+}
+
 static bool callValue(Value callee, int argCount)
 {
     if (IS_OBJ(callee))
@@ -119,6 +128,8 @@ static bool callValue(Value callee, int argCount)
             push(result);
             return true;
         }
+        case OBJ_FUNCTION:
+            return call(AS_FUNCTION(callee), argCount);
         default:
             break;
         }
@@ -328,10 +339,24 @@ static InterpretResult run()
             {
                 return INTERPRET_RUNTIME_ERROR;
             }
+            // update reference to frame pushed by the call
+            frame = &vm.frames[vm.frameCount - 1];
             break;
         }
         case OP_RETURN:
-            return INTERPRET_OK;
+        {
+            Value result = pop();
+            vm.frameCount--;
+            if (vm.frameCount == 0)
+            {
+                pop();
+                return INTERPRET_OK;
+            }
+            vm.stackTop = frame->slots;
+            push(result);
+            frame = &vm.frames[vm.frameCount - 1];
+            break;
+        }
         default:
             fprintf(stderr, "instruction not implemented: %d\n", instruction);
             exit(1);
@@ -354,10 +379,7 @@ InterpretResult interpret(char *source)
         return INTERPRET_COMPILE_ERROR;
     }
     push(OBJ_VAL(function));
-    CallFrame *frame = &vm.frames[vm.frameCount++];
-    frame->function = function;
-    frame->ip = function->chunk.code;
-    frame->slots = vm.stack;
+    call(function, 0);
     return run();
 }
 
@@ -371,10 +393,7 @@ void testVM()
     writeChunk(&function->chunk, constant, 123);
     writeChunk(&function->chunk, OP_RETURN, 123);
     push(OBJ_VAL(function));
-    CallFrame *frame = &vm.frames[vm.frameCount++];
-    frame->function = function;
-    frame->ip = function->chunk.code;
-    frame->slots = vm.stack;
+    call(function, 0);
     run();
     freeVM();
 }
