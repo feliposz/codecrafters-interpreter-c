@@ -308,6 +308,8 @@ static InterpretResult run()
             // leave the value on the stack
             break;
         }
+        // case OP_GET_UPVALUE:
+        // case OP_SET_UPVALUE:
         case OP_PRINT:
             printValue(pop());
             printf("\n");
