@@ -46,11 +46,6 @@ static Value pop()
     return *vm.stackTop;
 }
 
-static void popN(int n)
-{
-    vm.stackTop -= n;
-}
-
 static Value peek(int distance)
 {
     return *(vm.stackTop - distance - 1);
@@ -79,6 +74,7 @@ void initVM()
     initTable(&vm.strings);
     defineNative("clock", clockNative);
     vm.objects = NULL;
+    vm.openUpvalues = NULL;
 }
 
 void freeVM()
@@ -141,8 +137,44 @@ static bool callValue(Value callee, int argCount)
 
 static ObjUpvalue *captureUpvalue(Value *local)
 {
+    // start by verifying if upvalue was already added to list of open upvalues
+    ObjUpvalue *prevUpvalue = NULL;
+    ObjUpvalue *upvalue = vm.openUpvalues;
+    // search the (sorted) list of openvalues
+    // the pointer comparison works because open upvalues are stored sorted in stack order
+    while (upvalue != NULL && upvalue->location > local)
+    {
+        prevUpvalue = upvalue;
+        upvalue = upvalue->next;
+    }
+    if (upvalue != NULL && upvalue->location == local)
+    {
+        return upvalue;
+    }
+    // if not found, added it to the list at the sorted location
     ObjUpvalue *createdUpvalue = newUpvalue(local);
+    createdUpvalue->next = upvalue;
+    if (prevUpvalue == NULL)
+    {
+        vm.openUpvalues = createdUpvalue;
+    }
+    else
+    {
+        prevUpvalue->next = createdUpvalue;
+    }
     return createdUpvalue;
+}
+
+static void closeUpvalues(Value *last)
+{
+    // beginning on the top of the stack up until "last" is reached
+    while (vm.openUpvalues != NULL && vm.openUpvalues->location >= last)
+    {
+        ObjUpvalue* upvalue = vm.openUpvalues;
+        upvalue->closed = *upvalue->location; // copy value from stack into ObjUpvalue storage (heap)
+        upvalue->location = &upvalue->closed; // move reference to own copy
+        vm.openUpvalues = upvalue->next;
+    }
 }
 
 static InterpretResult run()
@@ -197,9 +229,6 @@ static InterpretResult run()
             break;
         case OP_POP:
             pop();
-            break;
-        case OP_POPN:
-            popN(READ_BYTE());
             break;
         case OP_NEGATE:
             if (!IS_NUMBER(peek(0)))
@@ -386,15 +415,22 @@ static InterpretResult run()
             // leave the value on the stack
             break;
         }
+        case OP_CLOSE_UPVALUE:
+            closeUpvalues(vm.stackTop - 1);
+            pop();
+            break;
         case OP_RETURN:
         {
             Value result = pop();
+            // close arguments that are captured
+            closeUpvalues(frame->slots);
             vm.frameCount--;
             if (vm.frameCount == 0)
             {
-                pop();
+                pop(); // pop <script> function itself
                 return INTERPRET_OK;
             }
+            // remove arguments from the stack
             vm.stackTop = frame->slots;
             push(result);
             frame = &vm.frames[vm.frameCount - 1];

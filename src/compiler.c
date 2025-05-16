@@ -51,6 +51,7 @@ typedef struct
 {
     Token name;
     int depth;
+    bool isCaptured;
 } Local;
 
 typedef struct
@@ -243,6 +244,7 @@ static void initCompiler(Compiler *compiler, FunctionType type)
     // reserve slot 1
     Local *local = &current->locals[current->localCount++];
     local->depth = 0;
+    local->isCaptured = false;
     local->name.start = "";
     local->name.length = 0;
 }
@@ -269,17 +271,20 @@ static void beginScope()
 static void endScope()
 {
     current->scopeDepth--;
-    uint8_t popCount = 0;
+    // remove from the stack the locals when exiting the block
+    // and/or capture the upvalues that need to be closed
     while (current->localCount > 0 &&
            current->locals[current->localCount - 1].depth > current->scopeDepth)
     {
-        popCount++;
+        if (current->locals[current->localCount -1].isCaptured)
+        {
+            emitByte(OP_CLOSE_UPVALUE);
+        }
+        else
+        {
+            emitByte(OP_POP);
+        }
         current->localCount--;
-    }
-    // remove from the stack the locals when exiting the block
-    if (popCount > 0)
-    {
-        emitBytes(OP_POPN, popCount);
     }
 }
 
@@ -350,6 +355,7 @@ static void addLocal(Token *name)
     Local *local = &current->locals[current->localCount++];
     local->name = *name;
     local->depth = LOCAL_UNDEFINED;
+    local->isCaptured = false;
 }
 
 static int addUpvalue(Compiler *compiler, uint8_t index, bool isLocal)
@@ -382,6 +388,7 @@ static int resolveUpvalue(Compiler *compiler, Token *name)
     int local = resolveLocal(compiler->enclosing, name);
     if (local != -1)
     {
+        compiler->enclosing->locals[local].isCaptured = true;
         return addUpvalue(compiler, (uint8_t)local, true);
     }
     // check the outer enclosing function recursively

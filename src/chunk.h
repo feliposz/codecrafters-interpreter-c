@@ -25,7 +25,6 @@ typedef enum
     OP_NOT_EQUAL,
     OP_PRINT,
     OP_POP,
-    OP_POPN,
     OP_DEFINE_GLOBAL,
     OP_GET_GLOBAL,
     OP_SET_GLOBAL,
@@ -38,6 +37,7 @@ typedef enum
     OP_CLOSURE,
     OP_GET_UPVALUE,
     OP_SET_UPVALUE,
+    OP_CLOSE_UPVALUE,
 } OpCode;
 
 typedef struct
