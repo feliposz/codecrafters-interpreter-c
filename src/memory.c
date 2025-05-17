@@ -13,6 +13,11 @@ void *reallocate(void *pointer, size_t oldSize, size_t newSize)
         collectGarbage();
 #endif
     }
+    vm.bytesAllocated += newSize - oldSize;
+    if (vm.bytesAllocated > vm.nextGC)
+    {
+        collectGarbage();
+    }
     if (newSize == 0)
     {
         free(pointer);
@@ -96,8 +101,8 @@ void markObject(Obj *object)
     object->isMarked = true;
     if (vm.grayCapacity < vm.grayCount + 1)
     {
-        int capacity = GROW_CAPACITY(vm.grayCapacity);
-        vm.grayMarks = (Obj **)realloc(vm.grayMarks, sizeof(Obj *) * capacity);
+        vm.grayCapacity = GROW_CAPACITY(vm.grayCapacity);
+        vm.grayMarks = (Obj **)realloc(vm.grayMarks, sizeof(Obj *) * vm.grayCapacity);
     }
     if (vm.grayMarks == NULL)
     {
@@ -234,10 +239,15 @@ void collectGarbage()
 #ifdef DEBUG_LOG_GC
     printf("-- gc begin\n");
 #endif
+    size_t before = vm.bytesAllocated;
     markRoots();
     traceReferences();
     sweep();
+    vm.nextGC = vm.bytesAllocated * GC_HEAP_GROW_FACTOR;
 #ifdef DEBUG_LOG_GC
     printf("-- gc end\n");
+    size_t freed = before - vm.bytesAllocated;
+    printf("   collected %zu bytes (from %zu to %zu) next at %zu\n",
+           freed, before, vm.bytesAllocated, vm.nextGC);
 #endif
 }
