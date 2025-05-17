@@ -6,6 +6,7 @@
 #include "chunk.h"
 #include "value.h"
 #include "object.h"
+#include "memory.h"
 #ifdef DEBUG_PRINT_CODE
 #include "debug.h"
 #endif
@@ -276,7 +277,7 @@ static void endScope()
     while (current->localCount > 0 &&
            current->locals[current->localCount - 1].depth > current->scopeDepth)
     {
-        if (current->locals[current->localCount -1].isCaptured)
+        if (current->locals[current->localCount - 1].isCaptured)
         {
             emitByte(OP_CLOSE_UPVALUE);
         }
@@ -887,7 +888,8 @@ static void function(FunctionType type)
     endScope();
     ObjFunction *function = endCompiler();
     emitBytes(OP_CLOSURE, makeConstant(OBJ_VAL(function)));
-    for (int i = 0; i < function->upvalueCount; i++) {
+    for (int i = 0; i < function->upvalueCount; i++)
+    {
         emitByte(compiler.upvalues[i].isLocal ? 1 : 0);
         emitByte(compiler.upvalues[i].index);
     }
@@ -935,4 +937,12 @@ ObjFunction *compile(const char *source)
     }
     ObjFunction *function = endCompiler();
     return parser.hadError ? NULL : function;
+}
+
+void markCompilerRoots()
+{
+    for (Compiler *compiler = current; compiler != NULL; compiler = compiler->enclosing)
+    {
+        markObject((Obj *)compiler->function);
+    }
 }
