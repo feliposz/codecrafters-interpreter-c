@@ -77,9 +77,9 @@ void initVM()
     resetStack();
     initTable(&vm.globals);
     initTable(&vm.strings);
-    defineNative("clock", clockNative);
     vm.objects = NULL;
     vm.openUpvalues = NULL;
+    defineNative("clock", clockNative);
 }
 
 void freeVM()
