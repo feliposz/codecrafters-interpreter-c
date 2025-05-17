@@ -242,6 +242,7 @@ void collectGarbage()
     size_t before = vm.bytesAllocated;
     markRoots();
     traceReferences();
+    tableRemoveWhite(&vm.strings);
     sweep();
     vm.nextGC = vm.bytesAllocated * GC_HEAP_GROW_FACTOR;
 #ifdef DEBUG_LOG_GC

@@ -2,6 +2,7 @@
 #include "chunk.h"
 #include "memory.h"
 #include "debug.h"
+#include "vm.h"
 
 void initChunk(Chunk *chunk)
 {
@@ -35,13 +36,16 @@ void writeChunk(Chunk *chunk, uint8_t byte, int line)
 
 int addConstant(Chunk *chunk, Value value)
 {
+    push(value); // keep on stack to avoid GC
     writeValueArray(&chunk->constants, value);
+    pop();
     return chunk->constants.count - 1;
 }
 
 void testChunk()
 {
     Chunk chunk;
+    initVM(); // need vm because of GC
     initChunk(&chunk);
     int constant = addConstant(&chunk, NUMBER_VAL(1.2));
     writeChunk(&chunk, OP_CONSTANT, 123);
@@ -49,4 +53,5 @@ void testChunk()
     writeChunk(&chunk, OP_RETURN, 123);
     disassembleChunk(&chunk, "test chunk");
     freeChunk(&chunk);
+    freeVM();
 }

@@ -2,6 +2,8 @@
 #include <string.h>
 #include "memory.h"
 #include "table.h"
+#include "value.h"
+#include "vm.h"
 
 #define TABLE_MAX_LOAD 0.75
 
@@ -151,13 +153,27 @@ bool tableDelete(Table *table, ObjString *key)
     return true;
 }
 
+void tableRemoveWhite(Table *table)
+{
+    for (int i = 0; i < table->capacity; i++)
+    {
+        Entry *entry = &table->entries[i];
+        if (entry->key != NULL && !entry->key->obj.isMarked)
+        {
+            tableDelete(table, entry->key);
+        }
+    }
+}
+
 void testHashTable()
 {
     Table table;
     initVM(); // only to keep track of string objects
     initTable(&table);
-    ObjString *keyA = copyString("key", 3);
-    ObjString *keyB = copyString("key", 3);
+    push(OBJ_VAL(copyString("key", 3)));
+    push(OBJ_VAL(copyString("key", 3)));
+    ObjString *keyA = AS_STRING(peek(0));
+    ObjString *keyB = AS_STRING(peek(1));
     printf("string interning check: %s\n", keyA == keyB ? "ok" : "fail");
     if (tableSet(&table, keyA, NUMBER_VAL(12345)))
     {
@@ -177,6 +193,8 @@ void testHashTable()
             printf("key '%.*s' not found.\n", keyB->length, keyB->chars);
         }
     }
+    pop();
+    pop();
     freeTable(&table);
     freeVM();
 }

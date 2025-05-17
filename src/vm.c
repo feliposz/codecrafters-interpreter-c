@@ -38,19 +38,19 @@ static void runtimeError(const char *format, ...)
     resetStack();
 }
 
-static void push(Value value)
+void push(Value value)
 {
     *vm.stackTop = value;
     vm.stackTop++;
 }
 
-static Value pop()
+Value pop()
 {
     vm.stackTop--;
     return *vm.stackTop;
 }
 
-static Value peek(int distance)
+Value peek(int distance)
 {
     return *(vm.stackTop - distance - 1);
 }
@@ -101,14 +101,17 @@ static bool isFalsey(Value value)
 
 static void concatenate()
 {
-    ObjString *b = AS_STRING(pop());
-    ObjString *a = AS_STRING(pop());
+    // keep strings on the stack to avoid GC
+    ObjString *b = AS_STRING(peek(0));
+    ObjString *a = AS_STRING(peek(1));
     int length = a->length + b->length;
     char *chars = ALLOCATE(char, length + 1);
     memcpy(chars, a->chars, a->length);
     memcpy(chars + a->length, b->chars, b->length);
     chars[length] = '\0';
     ObjString *result = takeString(chars, length);
+    pop();
+    pop();
     push(OBJ_VAL(result));
 }
 

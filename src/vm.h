@@ -43,6 +43,9 @@ extern VM vm;
 
 void initVM();
 void freeVM();
+void push(Value value);
+Value pop();
+Value peek(int distance);
 InterpretResult interpret(char *source);
 
 #endif
