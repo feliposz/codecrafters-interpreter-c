@@ -26,11 +26,16 @@ static void runtimeError(const char *format, ...)
     vfprintf(stderr, format, args);
     va_end(args);
     fprintf(stderr, "\n");
-    CallFrame *frame = &vm.frames[vm.frameCount - 1];
-    ObjFunction *function = frame->closure->function;
-    size_t offset = frame->ip - function->chunk.code - 1;
-    int line = function->chunk.lines[offset];
-    fprintf(stderr, "[line %d] in script\n", line);
+    // stack trace
+    for (int i = vm.frameCount - 1; i >= 0; i--)
+    {
+        CallFrame *frame = &vm.frames[i];
+        ObjFunction *function = frame->closure->function;
+        size_t offset = frame->ip - function->chunk.code - 1;
+        int line = function->chunk.lines[offset];
+        fprintf(stderr, "[line %d] in %s\n", line,
+                function->name != NULL ? function->name->chars : "script");
+    }
     resetStack();
 }
 
@@ -104,6 +109,16 @@ static void concatenate()
 
 static bool call(ObjClosure *closure, int argCount)
 {
+    if (closure->function->arity != argCount)
+    {
+        runtimeError("Expected %d arguments but got %d.", closure->function->arity, argCount);
+        return false;
+    }
+    if (vm.frameCount == FRAMES_MAX)
+    {
+        runtimeError("Stack overflow");
+        return false;
+    }
     CallFrame *frame = &vm.frames[vm.frameCount++];
     frame->closure = closure;
     frame->ip = closure->function->chunk.code;
@@ -170,7 +185,7 @@ static void closeUpvalues(Value *last)
     // beginning on the top of the stack up until "last" is reached
     while (vm.openUpvalues != NULL && vm.openUpvalues->location >= last)
     {
-        ObjUpvalue* upvalue = vm.openUpvalues;
+        ObjUpvalue *upvalue = vm.openUpvalues;
         upvalue->closed = *upvalue->location; // copy value from stack into ObjUpvalue storage (heap)
         upvalue->location = &upvalue->closed; // move reference to own copy
         vm.openUpvalues = upvalue->next;
