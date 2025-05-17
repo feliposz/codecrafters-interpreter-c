@@ -8,8 +8,7 @@
 #include "debug.h"
 #include "object.h"
 #include "memory.h"
-
-ObjFunction *compile(const char *source);
+#include "compiler.h"
 
 VM vm;
 
@@ -74,11 +73,14 @@ static void defineNative(char *name, NativeFn function)
 
 void initVM()
 {
+    vm.objects = NULL;
+    vm.openUpvalues = NULL;
+    vm.grayCount = 0;
+    vm.grayCapacity = 0;
+    vm.grayMarks = NULL;
     resetStack();
     initTable(&vm.globals);
     initTable(&vm.strings);
-    vm.objects = NULL;
-    vm.openUpvalues = NULL;
     defineNative("clock", clockNative);
 }
 
@@ -86,7 +88,8 @@ void freeVM()
 {
     freeTable(&vm.globals);
     freeTable(&vm.strings);
-    freeObjects();
+    free(vm.grayMarks);
+    freeObjects();    
 }
 
 static bool isFalsey(Value value)

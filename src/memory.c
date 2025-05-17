@@ -1,12 +1,9 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "common.h"
 #include "memory.h"
 #include "compiler.h"
-
-#ifdef DEBUG_LOG_GC
-#include <stdio.h>
 #include "debug.h"
-#endif
 
 void *reallocate(void *pointer, size_t oldSize, size_t newSize)
 {
@@ -87,12 +84,27 @@ void markObject(Obj *object)
     {
         return;
     }
+    if (object->isMarked)
+    {
+        return;
+    }
 #ifdef DEBUG_LOG_GC
     printf("%p mark ", object);
     printValue(OBJ_VAL(object));
     printf("\n");
 #endif
     object->isMarked = true;
+    if (vm.grayCapacity < vm.grayCount + 1)
+    {
+        int capacity = GROW_CAPACITY(vm.grayCapacity);
+        vm.grayMarks = (Obj **)realloc(vm.grayMarks, sizeof(Obj *) * capacity);
+    }
+    if (vm.grayMarks == NULL)
+    {
+        fprintf(stderr, "Out of memory.\n");
+        exit(1);
+    }
+    vm.grayMarks[vm.grayCount++] = object;
 }
 
 void markValue(Value value)
@@ -108,8 +120,16 @@ static void markTable(Table *table)
     for (int i = 0; i < table->capacity; i++)
     {
         Entry *entry = &table->entries[i];
-        markObject(entry->key);
+        markObject((Obj *)entry->key);
         markValue(entry->value);
+    }
+}
+
+static void markArray(ValueArray *array)
+{
+    for (int i = 0; i < array->count; i++)
+    {
+        markValue(array->values[i]);
     }
 }
 
@@ -135,12 +155,57 @@ static void markRoots()
     markCompilerRoots();
 }
 
+static void blackenObject(Obj *object)
+{
+#ifdef DEBUG_LOG_GC
+    printf("%p blacken ", object);
+    printValue(OBJ_VAL(object));
+    printf("\n");
+#endif
+    switch (object->type)
+    {
+    case OBJ_UPVALUE:
+        markValue(((ObjUpvalue *)object)->closed);
+        break;
+    case OBJ_FUNCTION:
+    {
+        ObjFunction *function = (ObjFunction *)object;
+        markObject((Obj *)function->name);
+        markArray(&function->chunk.constants);
+        break;
+    }
+    case OBJ_CLOSURE:
+    {
+        ObjClosure *closure = (ObjClosure *)object;
+        markObject((Obj *)closure->function);
+        for (int i = 0; i < closure->upvalueCount; i++)
+        {
+            markObject((Obj *)closure->upvalues[i]);
+        }
+        break;
+    }
+    case OBJ_NATIVE:
+    case OBJ_STRING:
+        break;
+    }
+}
+
+static void traceReferences()
+{
+    while (vm.grayCount > 0)
+    {
+        Obj *object = vm.grayMarks[--vm.grayCount];
+        blackenObject(object);
+    }
+}
+
 void collectGarbage()
 {
 #ifdef DEBUG_LOG_GC
     printf("-- gc begin\n");
 #endif
     markRoots();
+    traceReferences();
 #ifdef DEBUG_LOG_GC
     printf("-- gc end\n");
 #endif
