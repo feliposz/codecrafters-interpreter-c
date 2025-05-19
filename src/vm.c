@@ -562,7 +562,17 @@ static InterpretResult run()
             ObjClass *subClass = AS_CLASS(peek(0));
             tableAddAll(&AS_CLASS(superClass)->methods, &subClass->methods);
             pop(); // subClass
-            pop(); // superClass
+            break;
+        }
+        case OP_GET_SUPER:
+        {
+            ObjString *methodName = READ_STRING();
+            // pop the superclass and leave receiver (this) at the top of the stack
+            ObjClass *superClass = AS_CLASS(pop());
+            if (!bindMethod(superClass, methodName))
+            {
+                return INTERPRET_RUNTIME_ERROR;
+            }
             break;
         }
         default:

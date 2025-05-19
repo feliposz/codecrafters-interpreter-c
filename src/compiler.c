@@ -77,6 +77,7 @@ typedef struct Compiler
 typedef struct ClassCompiler
 {
     struct ClassCompiler *enclosing;
+    bool hasSuperclass;
 } ClassCompiler;
 
 typedef struct
@@ -369,7 +370,7 @@ static int resolveLocal(Compiler *compiler, Token *name)
     return -1;
 }
 
-static void addLocal(Token *name)
+static void addLocal(Token name)
 {
     if (current->localCount > UINT8_COUNT)
     {
@@ -377,7 +378,7 @@ static void addLocal(Token *name)
         return;
     }
     Local *local = &current->locals[current->localCount++];
-    local->name = *name;
+    local->name = name;
     local->depth = LOCAL_UNDEFINED;
     local->isCaptured = false;
 }
@@ -431,7 +432,7 @@ static void declareVariable()
     {
         return;
     }
-    Token *name = &parser.previous;
+    Token name = parser.previous;
     // check if local was already declared in current scope
     for (int i = current->localCount - 1; i >= 0; i--)
     {
@@ -441,7 +442,7 @@ static void declareVariable()
         {
             break;
         }
-        if (identifiersEqual(&local->name, name))
+        if (identifiersEqual(&local->name, &name))
         {
             error("Already a variable with this name in this scope.");
         }
@@ -449,23 +450,23 @@ static void declareVariable()
     addLocal(name);
 }
 
-static void namedVariable(Token *name, bool canAssign)
+static void namedVariable(Token name, bool canAssign)
 {
     uint8_t getOp, setOp;
-    int arg = resolveLocal(current, name);
+    int arg = resolveLocal(current, &name);
     if (arg != -1)
     {
         getOp = OP_GET_LOCAL;
         setOp = OP_SET_LOCAL;
     }
-    else if ((arg = resolveUpvalue(current, name)) != -1)
+    else if ((arg = resolveUpvalue(current, &name)) != -1)
     {
         getOp = OP_GET_UPVALUE;
         setOp = OP_SET_UPVALUE;
     }
     else
     {
-        arg = identifierConstant(name);
+        arg = identifierConstant(&name);
         getOp = OP_GET_GLOBAL;
         setOp = OP_SET_GLOBAL;
     }
@@ -482,7 +483,7 @@ static void namedVariable(Token *name, bool canAssign)
 
 static void variable(bool canAssign)
 {
-    namedVariable(&parser.previous, canAssign);
+    namedVariable(parser.previous, canAssign);
 }
 
 static void number(bool canAssign)
@@ -624,6 +625,24 @@ static void thisKeyword(bool canAssign)
     variable(false);
 }
 
+static Token syntheticToken(const char *text)
+{
+    Token token;
+    token.start = text;
+    token.length = strlen(text);
+    return token;
+}
+
+static void superKeyword(bool canAssign)
+{
+    consume(TOKEN_DOT, "Expect '.' after 'super'.");
+    consume(TOKEN_IDENTIFIER, "Expect superclass method name.");
+    uint8_t methodName = identifierConstant(&parser.previous);
+    namedVariable(syntheticToken("this"), false);
+    namedVariable(syntheticToken("super"), false);
+    emitBytes(OP_GET_SUPER, methodName);
+}
+
 static ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, call, PREC_CALL},
     [TOKEN_DOT] = {NULL, dot, PREC_CALL},
@@ -647,6 +666,7 @@ static ParseRule rules[] = {
     [TOKEN_NIL] = {literal, NULL, PREC_NONE},
     [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
     [TOKEN_THIS] = {thisKeyword, NULL, PREC_NONE},
+    [TOKEN_SUPER] = {superKeyword, NULL, PREC_NONE},
 };
 
 static ParseRule *getRule(TokenType type)
@@ -981,19 +1001,25 @@ static void classDeclaration()
     defineVariable(nameConstant);
     ClassCompiler classCompiler;
     classCompiler.enclosing = currentClass;
+    classCompiler.hasSuperclass = false;
     currentClass = &classCompiler;
     if (match(TOKEN_LESS))
     {
         consume(TOKEN_IDENTIFIER, "Expect class name.");
         variable(false);
-        namedVariable(&className, false);
+        // add superclass as a local variable to be accessed at runtime
+        beginScope();
+        addLocal(syntheticToken("super"));
+        defineVariable(0);
+        namedVariable(className, false);
         if (identifiersEqual(&className, &parser.previous))
         {
             error("A class can't inherit from itself.");
         }
         emitByte(OP_INHERIT);
+        classCompiler.hasSuperclass = true;
     }
-    namedVariable(&className, false);
+    namedVariable(className, false);
     consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
     while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF))
     {
@@ -1001,6 +1027,10 @@ static void classDeclaration()
     }
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
     emitByte(OP_POP); // class
+    if (classCompiler.hasSuperclass)
+    {
+        endScope();
+    }
     currentClass = currentClass->enclosing;
 }
 
