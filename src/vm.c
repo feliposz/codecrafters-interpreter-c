@@ -154,7 +154,7 @@ static bool callValue(Value callee, int argCount)
         {
             ObjClass *klass = AS_CLASS(callee);
             // place instance on the stack before arguments (slot 0 in callframe was reserved)
-            vm.stackTop[-argCount - 1] = OBJ_VAL(newInstance(klass));;
+            vm.stackTop[-argCount - 1] = OBJ_VAL(newInstance(klass));
             return true;
         }
         default:
@@ -469,6 +469,43 @@ static InterpretResult run()
         case OP_CLASS:
             push(OBJ_VAL(newClass(READ_STRING())));
             break;
+        case OP_SET_PROPERTY:
+        {
+            if (!IS_INSTANCE(peek(1)))
+            {
+                runtimeError("Only instances have fields.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            ObjInstance *instance = AS_INSTANCE(peek(1));
+            ObjString *name = READ_STRING();
+            Value value = pop();
+            tableSet(&instance->fields, name, value);
+            pop(); // instance
+            push(value);
+            break;
+        }
+        case OP_GET_PROPERTY:
+        {
+            if (!IS_INSTANCE(peek(0)))
+            {
+                runtimeError("Only instances have properties.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            ObjInstance *instance = AS_INSTANCE(peek(0));
+            ObjString *name = READ_STRING();
+            Value value;
+            if (tableGet(&instance->fields, name, &value))
+            {
+                pop(); // instance
+                push(value);
+            }
+            else
+            {
+                runtimeError("Undefined property '%s'.", name->chars);
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            break;
+        }
         default:
             fprintf(stderr, "instruction not implemented: %d\n", instruction);
             exit(1);
