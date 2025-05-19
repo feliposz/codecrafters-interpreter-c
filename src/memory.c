@@ -74,6 +74,11 @@ static void freeObject(Obj *object)
         FREE(ObjClass, object);
         break;
     }
+    case OBJ_INSTANCE:
+    {
+        FREE(ObjInstance, object);
+        break;
+    }
     }
 }
 
@@ -198,6 +203,12 @@ static void blackenObject(Obj *object)
     {
         ObjClass *klass = (ObjClass *)object;
         markObject((Obj *)klass->name);
+        break;
+    }
+    case OBJ_INSTANCE:
+    {
+        ObjInstance *instance = (ObjInstance *)object;
+        markObject((Obj *)instance->klass);
         break;
     }
     case OBJ_NATIVE:

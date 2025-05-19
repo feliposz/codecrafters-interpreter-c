@@ -103,6 +103,9 @@ void printObject(Value value)
     case OBJ_CLASS:
         printf("%s", AS_CLASS(value)->name->chars);
         break;
+    case OBJ_INSTANCE:
+        printf("%s instance", AS_INSTANCE(value)->klass->name->chars);
+        break;
     default:
         printf("object type not implemented: %d\n", OBJ_TYPE(value));
         exit(1);
@@ -155,4 +158,11 @@ ObjClass *newClass(ObjString *name)
     ObjClass *klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
     klass->name = name;
     return klass;
+}
+
+ObjInstance *newInstance(ObjClass *klass)
+{
+    ObjInstance *instance = ALLOCATE_OBJ(ObjInstance, OBJ_INSTANCE);
+    instance->klass = klass;
+    return instance;
 }
