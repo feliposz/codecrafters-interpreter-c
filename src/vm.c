@@ -150,6 +150,8 @@ static bool callValue(Value callee, int argCount)
         }
         case OBJ_CLOSURE:
             return call(AS_CLOSURE(callee), argCount);
+        case OBJ_BOUND_METHOD:
+            return call(AS_BOUND_METHOD(callee)->method, argCount);
         case OBJ_CLASS:
         {
             ObjClass *klass = AS_CLASS(callee);
@@ -213,6 +215,20 @@ static void defineMethod(ObjString *name)
     ObjClass *klass = AS_CLASS(peek(1));
     tableSet(&klass->methods, name, method);
     pop(); // method (closure)
+}
+
+static bool bindMethod(ObjClass *klass, ObjString *name)
+{
+    Value method;
+    if (!tableGet(&klass->methods, name, &method))
+    {
+        runtimeError("Undefined property '%s'.", name->chars);
+        return false;
+    }
+    ObjBoundMethod *bound = newBoundMethod(peek(0), AS_CLOSURE(method));
+    pop();
+    push(OBJ_VAL(bound));
+    return true;
 }
 
 static InterpretResult run()
@@ -508,14 +524,11 @@ static InterpretResult run()
                 push(value);
                 break;
             }
-            if (tableGet(&instance->klass->methods, name, &value))
+            if (!bindMethod(instance->klass, name))
             {
-                pop(); // instance
-                push(value);
-                break;
+                return INTERPRET_RUNTIME_ERROR;
             }
-            runtimeError("Undefined property '%s'.", name->chars);
-            return INTERPRET_RUNTIME_ERROR;
+            break;
         }
         case OP_METHOD:
             defineMethod(READ_STRING());
