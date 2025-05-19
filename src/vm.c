@@ -73,6 +73,7 @@ static void defineNative(char *name, NativeFn function)
 
 void initVM()
 {
+    resetStack();
     vm.objects = NULL;
     vm.openUpvalues = NULL;
     vm.grayCount = 0;
@@ -80,10 +81,11 @@ void initVM()
     vm.grayMarks = NULL;
     vm.bytesAllocated = 0;
     vm.nextGC = 1024;
-    resetStack();
+    vm.initString = NULL; // make sure GC is happy if invoked inside copyString
     initTable(&vm.globals);
     initTable(&vm.strings);
     defineNative("clock", clockNative);
+    vm.initString = copyString("init", 4);
 }
 
 void freeVM()
@@ -91,6 +93,7 @@ void freeVM()
     freeTable(&vm.globals);
     freeTable(&vm.strings);
     free(vm.grayMarks);
+    vm.initString = NULL;
     freeObjects();
 }
 
@@ -162,6 +165,16 @@ static bool callValue(Value callee, int argCount)
             ObjClass *klass = AS_CLASS(callee);
             // place instance on the stack before arguments (slot 0 in callframe was reserved)
             vm.stackTop[-argCount - 1] = OBJ_VAL(newInstance(klass));
+            Value initializer;
+            if (tableGet(&klass->methods, vm.initString, &initializer))
+            {
+                return call(AS_CLOSURE(initializer), argCount);
+            }
+            else if (argCount != 0) // if class doesn't have an initializer, it expects no arguments
+            {
+                runtimeError("Expected 0 arguments but got %d.", argCount);
+                return false;
+            }
             return true;
         }
         default:

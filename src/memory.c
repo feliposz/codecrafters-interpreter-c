@@ -176,6 +176,7 @@ static void markRoots()
     }
     // globals
     markTable(&vm.globals);
+    markObject((Obj *)vm.initString);
     markCompilerRoots();
 }
 

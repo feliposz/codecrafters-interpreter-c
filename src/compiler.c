@@ -44,6 +44,7 @@ static void statement();
 
 typedef enum
 {
+    TYPE_INITIALIZER,
     TYPE_FUNCTION,
     TYPE_METHOD,
     TYPE_SCRIPT,
@@ -200,7 +201,14 @@ static void emitConstant(Value value)
 
 static void emitReturn()
 {
-    emitByte(OP_NIL);
+    if (current->type == TYPE_INITIALIZER)
+    {
+        emitBytes(OP_GET_LOCAL, 0); // return this
+    }
+    else
+    {
+        emitByte(OP_NIL);
+    }
     emitByte(OP_RETURN);
 }
 
@@ -948,7 +956,14 @@ static void method()
 {
     consume(TOKEN_IDENTIFIER, "Expect method name.");
     uint8_t nameConstant = identifierConstant(&parser.previous);
-    function(TYPE_METHOD);
+    if (parser.previous.length == 4 && memcmp(parser.previous.start, "init", 4) == 0)
+    {
+        function(TYPE_INITIALIZER);
+    }
+    else
+    {
+        function(TYPE_METHOD);
+    }
     emitBytes(OP_METHOD, nameConstant);
 }
 
