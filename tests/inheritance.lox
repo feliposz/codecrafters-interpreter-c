@@ -1,0 +1,87 @@
+class Doughnut {
+  cook() {
+    print "Fry until golden brown.";
+  }
+}
+
+// BostonCream is a subclass of Doughnut
+class BostonCream < Doughnut {}
+
+// BostonCream class should inherit the cook
+// method from Doughnut class
+BostonCream().cook();
+
+class Root {
+  getName() {
+    print "Root class";
+  }
+}
+
+class Parent < Root {
+  parentMethod() {
+    print "Method defined in Parent";
+  }
+}
+
+class Child < Parent {
+  childMethod() {
+    print "Method defined in Child";
+  }
+}
+
+var root = Root();
+var parent = Parent();
+var child = Child();
+
+// Root methods are available to all
+root.getName();
+parent.getName();
+child.getName();
+
+// Parent methods are available to Parent and Child
+parent.parentMethod();
+child.parentMethod();
+
+// Child methods are only available to Child
+child.childMethod();
+
+class A {
+  method() {
+    print "A method";
+  }
+}
+
+class B < A {
+  method() {
+    print "B method";
+  }
+
+  test() {
+    super.method();
+  }
+}
+
+class C < B {}
+
+C().test();
+
+
+class Doughnut2 {
+  cook() {
+    print "Dunk in the fryer.";
+    this.finish("sprinkles");
+  }
+
+  finish(ingredient) {
+    print "Finish with " + ingredient;
+  }
+}
+
+class Cruller < Doughnut2 {
+  finish(ingredient) {
+    // No sprinkles, always icing.
+    super.finish("icing");
+  }
+}
+
+Cruller().finish("ignored");

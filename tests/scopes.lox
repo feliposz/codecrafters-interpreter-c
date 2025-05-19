@@ -1,0 +1,54 @@
+{
+    var world = "before";
+    {
+        var world = "after";
+        print world;
+    }
+    print world;
+}
+
+var baz = (91 * 16) - 61;
+{
+    var world = "quz" + "89";
+    print world;
+}
+print baz;
+
+{
+    var quz = "before";
+    {
+        var quz = "after";
+        print quz;
+    }
+    print quz;
+}
+
+var bar = "global bar";
+var world = "global world";
+var hello = "global hello";
+{
+  var bar = "outer bar";
+  var world = "outer world";
+  {
+    var bar = "inner bar";
+    print bar;
+    print world;
+    print hello;
+  }
+  print bar;
+  print world;
+  print hello;
+}
+print bar;
+print world;
+print hello;
+
+{
+  var hellocal = "outer hellocal";
+  {
+    var hellocal = "inner hellocal";
+    print hellocal;
+  }
+  print hellocal;
+}
+print hellocal;

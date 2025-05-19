@@ -1,0 +1,33 @@
+fun hello() {
+    print "hello function!";
+}
+
+fun other() {
+    for (var i = 0; i < 3; i = i + 1) {
+        hello();
+    }
+}
+
+print hello;
+hello();
+other();
+
+fun first() {
+  var a = 1;
+  second();
+  var b = 2;
+  second();
+}
+
+fun second() {
+  var c = 3;
+  var d = 4;
+}
+
+first();
+
+fun sum(a, b, c) {
+  return a + b + c;
+}
+
+print 4 + sum(5, 6, 7);

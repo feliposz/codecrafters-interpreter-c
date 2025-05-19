@@ -1,0 +1,130 @@
+if (true) print "bar";
+
+if (true) {
+  print "block body";
+}
+
+var a = false;
+if (a = true) {
+  print (a == true);
+}
+
+var stage = "unknown";
+var age = 50;
+if (age < 18) { stage = "child"; }
+if (age >= 18) { stage = "adult"; }
+print stage;
+
+var isAdult = age >= 18;
+if (isAdult) { print "eligible for voting: true"; }
+if (!isAdult) { print "eligible for voting: false"; }
+
+if (true) print "if branch"; else print "else branch";
+
+var age = 21;
+if (age > 18) print "adult"; else print "child";
+
+if (false) {
+  print "if block";
+} else print "else statement";
+
+if (false) print "if statement"; else {
+  print "else block";
+}
+
+var celsius = 67;
+var fahrenheit = 0;
+var isHot = false;
+
+{
+  fahrenheit = celsius * 9 / 5 + 32;
+  print celsius; print fahrenheit;
+
+  if (celsius > 30) {
+    isHot = true;
+    print "It's a hot day. Stay hydrated!";
+  } else {
+    print "It's cold today. Wear a jacket!";
+  }
+
+  if (isHot) { print "Remember to use sunscreen!"; }
+}
+
+if (true) print "if branch"; else if (false) print "else-if branch";
+
+if (true) {
+  print "hello";
+} else if (true) print "hello";
+
+if (true) print "hello"; else if (true) {
+  print "hello";
+}
+
+var age = 88;
+var stage = "unknown";
+if (age < 18) { stage = "child"; }
+else if (age >= 18) { stage = "adult"; }
+else if (age >= 65) { stage = "senior"; }
+else if (age >= 100) { stage = "centenarian"; }
+print stage;
+
+var age = 67;
+
+var isAdult = age >= 18;
+if (isAdult) { print "eligible for voting: true"; }
+else { print "eligible for voting: false"; }
+
+if (age < 16) { print "eligible for driving: false"; }
+else if (age < 18) { print "eligible for driving: learner's permit"; }
+else { print "eligible for driving: full license"; }
+
+if (age < 21) { print "eligible for drinking (US): false"; }
+else { print "eligible for drinking (US): true"; }
+
+if (true) if (true) print "nested true";
+
+if (true) {
+  if (false) print "quz"; else print "quz";
+}
+
+var stage = "unknown";
+var age = 29;
+if (age < 18) {
+    if (age < 13) { stage = "child"; }
+    else if (age < 16) { stage = "young teenager"; }
+    else { stage = "teenager"; }
+}
+else if (age < 65) {
+    if (age < 30) { stage = "young adult"; }
+    else if (age < 50) { stage = "adult"; }
+    else { stage = "middle-aged adult"; }
+}
+else { stage = "senior"; }
+print stage;
+
+var isAdult = age >= 18;
+if (isAdult) {
+    print "eligible for voting: true";
+    if (age < 25) {
+        print "first-time voter: likely";
+    }
+    else { print "first-time voter: unlikely"; }
+}
+else { print "eligible for voting: false"; }
+
+if (age < 16) { print "eligible for driving: false"; }
+else if (age < 18) {
+    print "eligible for driving: learner's permit";
+    if (age < 17) { print "supervised driving required"; }
+    else { print "unsupervised driving allowed with restrictions"; }
+}
+else { print "eligible for driving: full license"; }
+
+if (age < 21) { print "eligible for drinking (US): false"; }
+else {
+    print "eligible for drinking (US): true";
+    if (age < 25) { print "remember: drink responsibly!"; }
+}
+
+if (true) if (false) print "world"; else print "baz";
+

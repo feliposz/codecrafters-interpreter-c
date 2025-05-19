@@ -1,0 +1,296 @@
++ dirname ./test.sh
++ ./build/interpreter testchunk
+=== test chunk ===
+offs line instruction
+---- ---- -----------
+0000  123 OP_CONSTANT         0 '1.2'
+0002    | OP_RETURN
++ dirname ./test.sh
++ ./build/interpreter testvm
++ dirname ./test.sh
++ ./build/interpreter testhash
+string interning check: ok
+found value for 'key': 12345
+key 'key' not found.
++ dirname ./test.sh
++ ./build/interpreter tokenize tests/empty.lox
+EOF  null
++ dirname ./test.sh
++ ./build/interpreter tokenize tests/tokens.lox
+LEFT_PAREN ( null
+RIGHT_PAREN ) null
+LEFT_BRACE { null
+RIGHT_BRACE } null
+SEMICOLON ; null
+COMMA , null
+PLUS + null
+MINUS - null
+STAR * null
+BANG_EQUAL != null
+EQUAL_EQUAL == null
+LESS_EQUAL <= null
+GREATER_EQUAL >= null
+BANG_EQUAL != null
+LESS < null
+GREATER > null
+SLASH / null
+DOT . null
+[line 2] Error: Unexpected character: $
+[line 22] Error: Unexpected character: #
+EOF  null
++ dirname ./test.sh
++ ./build/interpreter tokenize tests/numbers.lox
+NUMBER 123 123.0
+NUMBER 123.456 123.456
+DOT . null
+NUMBER 456 456.0
+NUMBER 123 123.0
+DOT . null
+NUMBER 9356.4583 9356.4583
+EOF  null
++ dirname ./test.sh
++ ./build/interpreter tokenize tests/strings.lox
+STRING "" 
+STRING "string" string
+EOF  null
++ dirname ./test.sh
++ ./build/interpreter tokenize tests/identifiers.lox
+IDENTIFIER andy null
+IDENTIFIER formless null
+IDENTIFIER fo null
+IDENTIFIER _ null
+IDENTIFIER _123 null
+IDENTIFIER _abc null
+IDENTIFIER ab123 null
+IDENTIFIER abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_ null
+EOF  null
++ dirname ./test.sh
++ ./build/interpreter tokenize tests/keywords.lox
+AND and null
+CLASS class null
+ELSE else null
+FALSE false null
+FOR for null
+FUN fun null
+IF if null
+NIL nil null
+OR or null
+RETURN return null
+SUPER super null
+THIS this null
+TRUE true null
+VAR var null
+WHILE while null
+EOF  null
++ dirname ./test.sh
++ ./build/interpreter evaluate tests/value.lox
+true
++ dirname ./test.sh
++ ./build/interpreter evaluate tests/expr.lox
+3.4
++ dirname ./test.sh
++ ./build/interpreter run tests/print.lox
+3
+12
+hello world!
+nil
+true
+baz
+true
+true
+true
+the expression below is invalid
+Operands must be two numbers or two strings.
+[line 17] in script
++ dirname ./test.sh
++ ./build/interpreter run tests/vars.lox
+10
+198
+297
+198
+297
+152
+beignets with cafe au lait
+4
+before
+after
+baz
+before
+after
+88
+88
+22
++ dirname ./test.sh
++ ./build/interpreter run tests/scopes.lox
+after
+before
+quz89
+1395
+after
+before
+inner bar
+outer world
+global hello
+outer bar
+outer world
+global hello
+global bar
+global world
+global hello
+inner hellocal
+outer hellocal
+Undefined variable 'hellocal'.
+[line 54] in script
++ dirname ./test.sh
++ ./build/interpreter run tests/if.lox
+bar
+block body
+true
+adult
+eligible for voting: true
+if branch
+adult
+else statement
+else block
+67
+152.6
+It's a hot day. Stay hydrated!
+Remember to use sunscreen!
+if branch
+hello
+hello
+adult
+eligible for voting: true
+eligible for driving: full license
+eligible for drinking (US): true
+nested true
+quz
+young adult
+eligible for voting: true
+first-time voter: unlikely
+eligible for driving: full license
+eligible for drinking (US): true
+baz
++ dirname ./test.sh
++ ./build/interpreter run tests/while.lox
+1
+2
+3
+0
+1
+2
+Product of numbers 1 to 5: 
+120
+0
+1
+1
+2
+3
+5
+8
+13
+21
+34
++ dirname ./test.sh
++ ./build/interpreter run tests/for.lox
+1
+2
+3
+0
+1
+2
+0
+1
+0
+1
+0
+-1
+after
+0
++ dirname ./test.sh
++ ./build/interpreter run tests/logical.lox
+ok
+baz
+baz
+world
+bar
+bar
+41
+41
+true
+false
+false
+true
+false
+true
+adult
+eligible for voting: true
+false
+hello
+baz
+baz
+bar
+false
+1
+false
+true
+23
+true
+false
+child
+eligible for voting: false
++ dirname ./test.sh
++ ./build/interpreter run tests/native.lox
+<native fn>
+<native fn>
+0
++ dirname ./test.sh
++ ./build/interpreter run tests/fun.lox
+<fn hello>
+hello function!
+hello function!
+hello function!
+hello function!
+22
++ dirname ./test.sh
++ ./build/interpreter run tests/closure.lox
+Numbers >= 55:
+55
+56
+57
+58
+59
+Numbers >= 10:
+10
+11
+12
+13
+14
+Hello Bob
+36
+1296
+1679616
++ dirname ./test.sh
++ ./build/interpreter run tests/class.lox
+Nested instance
+Spaceship instance
+175
+Woof
+Cat
+Wizard instance
+Casting spell as Merlin
++ dirname ./test.sh
++ ./build/interpreter run tests/inheritance.lox
+Fry until golden brown.
+Root class
+Root class
+Root class
+Method defined in Parent
+Method defined in Parent
+Method defined in Child
+A method
+Finish with icing
++ dirname ./test.sh
++ ./build/interpreter run tests/invoke.lox
+Enjoy your cup of coffee and chicory
+not a method

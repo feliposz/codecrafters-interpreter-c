@@ -1,0 +1,69 @@
+var world = 10;
+print world;
+
+var bar = 99;
+var foo = 99;
+print bar + foo;
+var quz = 99;
+print bar + foo + quz;
+
+var bar = 99;
+var foo = 99;
+print bar + foo;
+var quz = 99;
+print bar + foo + quz;
+
+var quz = 76;
+var baz = quz;
+print baz + quz;
+
+var breakfast = "beignets";
+var beverage = "cafe au lait";
+breakfast = "beignets with " + beverage;
+
+print breakfast;
+
+var a;
+var b = 1;
+a = (b = 2);
+print a + b;
+
+{
+    var foo = "before";
+    print foo;
+}
+{
+    var foo = "after";
+    print foo;
+}
+
+{
+    var hello = "baz";
+    print hello;
+}
+
+{
+    var world = "before";
+    print world;
+}
+{
+    var world = "after";
+    print world;
+}
+
+{
+    var hello = 88;
+    {
+        var foo = 88;
+        print foo;
+    }
+    print hello;
+}
+
+{
+    var bar = 11;
+    var world = 11;
+    {
+        print bar + world;
+    }
+}
