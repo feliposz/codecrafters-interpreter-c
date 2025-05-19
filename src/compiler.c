@@ -902,6 +902,17 @@ static void funDeclaration()
     defineVariable(global);
 }
 
+static void classDeclaration()
+{
+    consume(TOKEN_IDENTIFIER, "Expect class name.");
+    uint8_t nameConstant = identifierConstant(&parser.previous);
+    declareVariable();
+    emitBytes(OP_CLASS, nameConstant);
+    defineVariable(nameConstant);
+    consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
+    consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
+}
+
 static void declaration()
 {
     if (match(TOKEN_VAR))
@@ -911,6 +922,10 @@ static void declaration()
     else if (match(TOKEN_FUN))
     {
         funDeclaration();
+    }
+    else if (match(TOKEN_CLASS))
+    {
+        classDeclaration();
     }
     else
     {

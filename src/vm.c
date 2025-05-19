@@ -91,7 +91,7 @@ void freeVM()
     freeTable(&vm.globals);
     freeTable(&vm.strings);
     free(vm.grayMarks);
-    freeObjects();    
+    freeObjects();
 }
 
 static bool isFalsey(Value value)
@@ -459,6 +459,9 @@ static InterpretResult run()
             frame = &vm.frames[vm.frameCount - 1];
             break;
         }
+        case OP_CLASS:
+            push(OBJ_VAL(newClass(READ_STRING())));
+            break;
         default:
             fprintf(stderr, "instruction not implemented: %d\n", instruction);
             exit(1);
