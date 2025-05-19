@@ -207,6 +207,14 @@ static void closeUpvalues(Value *last)
     }
 }
 
+static void defineMethod(ObjString *name)
+{
+    Value method = peek(0);
+    ObjClass *klass = AS_CLASS(peek(1));
+    tableSet(&klass->methods, name, method);
+    pop(); // method (closure)
+}
+
 static InterpretResult run()
 {
     CallFrame *frame = &vm.frames[vm.frameCount - 1];
@@ -498,14 +506,20 @@ static InterpretResult run()
             {
                 pop(); // instance
                 push(value);
+                break;
             }
-            else
+            if (tableGet(&instance->klass->methods, name, &value))
             {
-                runtimeError("Undefined property '%s'.", name->chars);
-                return INTERPRET_RUNTIME_ERROR;
+                pop(); // instance
+                push(value);
+                break;
             }
-            break;
+            runtimeError("Undefined property '%s'.", name->chars);
+            return INTERPRET_RUNTIME_ERROR;
         }
+        case OP_METHOD:
+            defineMethod(READ_STRING());
+            break;
         default:
             fprintf(stderr, "instruction not implemented: %d\n", instruction);
             exit(1);
