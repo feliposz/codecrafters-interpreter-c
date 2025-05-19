@@ -249,6 +249,37 @@ static bool bindMethod(ObjClass *klass, ObjString *name)
     return true;
 }
 
+static bool invokeFromClass(ObjClass *klass, ObjString *methodName, int argCount)
+{
+    Value method;
+    if (!tableGet(&klass->methods, methodName, &method))
+    {
+        runtimeError("Undefined property '%s'.", methodName->chars);
+        return false;
+    }
+    return call(AS_CLOSURE(method), argCount);
+}
+
+static bool invoke(ObjString *methodName, int argCount)
+{
+    Value receiver = peek(argCount);
+    if (!IS_INSTANCE(receiver))
+    {
+        runtimeError("Only instances have methods.");
+        return false;
+    }
+    ObjInstance *instance = AS_INSTANCE(receiver);
+    // method might be actually a function assigned to a field
+    Value value;
+    if (tableGet(&instance->fields, methodName, &value))
+    {
+        // place closure at slot 0 and do regular call instead of method invocation
+        vm.stackTop[-argCount - 1] = value;
+        return callValue(value, argCount);
+    }
+    return invokeFromClass(instance->klass, methodName, argCount);
+}
+
 static InterpretResult run()
 {
     CallFrame *frame = &vm.frames[vm.frameCount - 1];
@@ -573,6 +604,30 @@ static InterpretResult run()
             {
                 return INTERPRET_RUNTIME_ERROR;
             }
+            break;
+        }
+        case OP_INVOKE:
+        {
+            ObjString *methodName = READ_STRING();
+            int argCount = READ_BYTE();
+            if (!invoke(methodName, argCount))
+            {
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            frame = &vm.frames[vm.frameCount - 1];
+            break;
+        }
+        case OP_SUPER_INVOKE:
+        {
+            ObjString *methodName = READ_STRING();
+            int argCount = READ_BYTE();
+            // pop the superclass and leave receiver (this) at the top of the stack
+            ObjClass *superClass = AS_CLASS(pop());
+            if (!invokeFromClass(superClass, methodName, argCount))
+            {
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            frame = &vm.frames[vm.frameCount - 1];
             break;
         }
         default:

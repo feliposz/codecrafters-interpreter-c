@@ -609,6 +609,12 @@ static void dot(bool canAssign)
         expression();
         emitBytes(OP_SET_PROPERTY, name);
     }
+    else if (match(TOKEN_LEFT_PAREN))
+    {
+        uint8_t argCount = argumentList();
+        emitBytes(OP_INVOKE, name);
+        emitByte(argCount);
+    }
     else
     {
         emitBytes(OP_GET_PROPERTY, name);
@@ -649,8 +655,18 @@ static void superKeyword(bool canAssign)
     consume(TOKEN_IDENTIFIER, "Expect superclass method name.");
     uint8_t methodName = identifierConstant(&parser.previous);
     namedVariable(syntheticToken("this"), false);
-    namedVariable(syntheticToken("super"), false);
-    emitBytes(OP_GET_SUPER, methodName);
+    if (match(TOKEN_LEFT_PAREN))
+    {
+        uint8_t argCount = argumentList();
+        namedVariable(syntheticToken("super"), false);
+        emitBytes(OP_SUPER_INVOKE, methodName);
+        emitByte(argCount);
+    }
+    else
+    {
+        namedVariable(syntheticToken("super"), false);
+        emitBytes(OP_GET_SUPER, methodName);
+    }
 }
 
 static ParseRule rules[] = {

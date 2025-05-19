@@ -11,9 +11,9 @@ int simpleInstruction(const char *name, int offset)
 int constantInstruction(const char *name, Chunk *chunk, int offset)
 {
     uint8_t constant = chunk->code[offset + 1];
-    printf("%-16s %4d ", name, constant);
+    printf("%-16s %4d '", name, constant);
     printValue(chunk->constants.values[constant]);
-    printf("\n");
+    printf("'\n");
     return offset + 2;
 }
 
@@ -29,6 +29,16 @@ int jumpInstruction(const char *name, int sign, Chunk *chunk, int offset)
     uint16_t jump = chunk->code[offset + 1] << 8 | chunk->code[offset + 2];
     int dest = offset + 3 + sign * jump;
     printf("%-16s %4d -> %d\n", name, jump, dest);
+    return offset + 3;
+}
+
+int invokeInstruction(const char *name, Chunk *chunk, int offset)
+{
+    uint8_t constant = chunk->code[offset + 1];
+    uint8_t argCount = chunk->code[offset + 2];
+    printf("%-16s (%d args) %4d '", name, argCount, constant);
+    printValue(chunk->constants.values[constant]);
+    printf("'\n");
     return offset + 3;
 }
 
@@ -84,6 +94,10 @@ int disassembleInstruction(Chunk *chunk, int offset)
         return simpleInstruction("OP_INHERIT", offset);
     case OP_GET_SUPER:
         return constantInstruction("OP_GET_SUPER", chunk, offset);
+    case OP_INVOKE:
+        return invokeInstruction("OP_INVOKE", chunk, offset);
+    case OP_SUPER_INVOKE:
+        return invokeInstruction("OP_SUPER_INVOKE", chunk, offset);
     case OP_CLOSURE:
     {
         offset++;
