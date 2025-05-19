@@ -73,6 +73,11 @@ typedef struct Compiler
     Upvalue upvalues[UINT8_COUNT];
 } Compiler;
 
+typedef struct ClassCompiler
+{
+    struct ClassCompiler *enclosing;
+} ClassCompiler;
+
 typedef struct
 {
     Token previous;
@@ -83,6 +88,7 @@ typedef struct
 
 static Parser parser;
 static Compiler *current = NULL;
+static ClassCompiler *currentClass = NULL;
 
 static Chunk *currentChunk()
 {
@@ -602,6 +608,11 @@ static void dot(bool canAssign)
 
 static void thisKeyword(bool canAssign)
 {
+    if (currentClass == NULL)
+    {
+        error("Can't use 'this' outside of a class.");
+        return;
+    }
     variable(false);
 }
 
@@ -949,6 +960,9 @@ static void classDeclaration()
     declareVariable();
     emitBytes(OP_CLASS, nameConstant);
     defineVariable(nameConstant);
+    ClassCompiler classCompiler;
+    classCompiler.enclosing = currentClass;
+    currentClass = &classCompiler;
     namedVariable(&className, false);
     consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
     while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF))
@@ -957,6 +971,7 @@ static void classDeclaration()
     }
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
     emitByte(OP_POP); // class
+    currentClass = currentClass->enclosing;
 }
 
 static void declaration()
