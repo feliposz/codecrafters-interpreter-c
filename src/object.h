@@ -4,6 +4,7 @@
 #include "common.h"
 #include "chunk.h"
 #include "value.h"
+#include "table.h"
 
 typedef enum
 {
@@ -74,6 +75,7 @@ typedef struct
 {
     Obj obj;
     ObjClass *klass;
+    Table fields;
 } ObjInstance;
 
 #define OBJ_TYPE(value) (AS_OBJ(value)->type)
