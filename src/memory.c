@@ -14,14 +14,14 @@ void *reallocate(void *pointer, size_t oldSize, size_t newSize)
 #endif
     }
     vm.bytesAllocated += newSize - oldSize;
-    if (vm.bytesAllocated > vm.nextGC)
-    {
-        collectGarbage();
-    }
     if (newSize == 0)
     {
         free(pointer);
         return NULL;
+    }
+    if (vm.bytesAllocated > vm.nextGC)
+    {
+        collectGarbage();
     }
     void *result = realloc(pointer, newSize);
     if (result == NULL)
