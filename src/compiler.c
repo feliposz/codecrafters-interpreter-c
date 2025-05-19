@@ -635,6 +635,16 @@ static Token syntheticToken(const char *text)
 
 static void superKeyword(bool canAssign)
 {
+    if (currentClass == NULL)
+    {
+        error("Can't use 'super' outside of a class.");
+        return;
+    }
+    if (!currentClass->hasSuperclass)
+    {
+        error("Can't use 'super' in a class with no superclass.");
+        return;
+    }
     consume(TOKEN_DOT, "Expect '.' after 'super'.");
     consume(TOKEN_IDENTIFIER, "Expect superclass method name.");
     uint8_t methodName = identifierConstant(&parser.previous);
