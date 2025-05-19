@@ -45,6 +45,7 @@ static void statement();
 typedef enum
 {
     TYPE_FUNCTION,
+    TYPE_METHOD,
     TYPE_SCRIPT,
 } FunctionType;
 
@@ -242,12 +243,20 @@ static void initCompiler(Compiler *compiler, FunctionType type)
     {
         current->function->name = copyString((char *)parser.previous.start, parser.previous.length);
     }
-    // reserve slot 1
+    // reserve slot 0 for 'this' on methods and initializers
     Local *local = &current->locals[current->localCount++];
     local->depth = 0;
     local->isCaptured = false;
-    local->name.start = "";
-    local->name.length = 0;
+    if (type != TYPE_FUNCTION)
+    {
+        local->name.start = "this";
+        local->name.length = 4;
+    }
+    else
+    {
+        local->name.start = "";
+        local->name.length = 0;
+    }
 }
 
 static ObjFunction *endCompiler()
@@ -591,6 +600,11 @@ static void dot(bool canAssign)
     }
 }
 
+static void thisKeyword(bool canAssign)
+{
+    variable(false);
+}
+
 static ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, call, PREC_CALL},
     [TOKEN_DOT] = {NULL, dot, PREC_CALL},
@@ -613,6 +627,7 @@ static ParseRule rules[] = {
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
     [TOKEN_NIL] = {literal, NULL, PREC_NONE},
     [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
+    [TOKEN_THIS] = {thisKeyword, NULL, PREC_NONE},
 };
 
 static ParseRule *getRule(TokenType type)
@@ -922,7 +937,7 @@ static void method()
 {
     consume(TOKEN_IDENTIFIER, "Expect method name.");
     uint8_t nameConstant = identifierConstant(&parser.previous);
-    function(TYPE_FUNCTION);
+    function(TYPE_METHOD);
     emitBytes(OP_METHOD, nameConstant);
 }
 
