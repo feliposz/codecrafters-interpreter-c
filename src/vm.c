@@ -553,9 +553,14 @@ static InterpretResult run()
             break;
         case OP_INHERIT:
         {
-            ObjClass *superClass = AS_CLASS(peek(1));
+            Value superClass = peek(1);
+            if (!IS_CLASS(superClass))
+            {
+                runtimeError("Superclass must be a class.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
             ObjClass *subClass = AS_CLASS(peek(0));
-            tableAddAll(&superClass->methods, &subClass->methods);
+            tableAddAll(&AS_CLASS(superClass)->methods, &subClass->methods);
             pop(); // subClass
             pop(); // superClass
             break;

@@ -987,6 +987,10 @@ static void classDeclaration()
         consume(TOKEN_IDENTIFIER, "Expect class name.");
         variable(false);
         namedVariable(&className, false);
+        if (identifiersEqual(&className, &parser.previous))
+        {
+            error("A class can't inherit from itself.");
+        }
         emitByte(OP_INHERIT);
     }
     namedVariable(&className, false);
