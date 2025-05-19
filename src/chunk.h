@@ -42,6 +42,7 @@ typedef enum
     OP_SET_PROPERTY,
     OP_GET_PROPERTY,
     OP_METHOD,
+    OP_INHERIT,
 } OpCode;
 
 typedef struct

@@ -165,6 +165,18 @@ void tableRemoveWhite(Table *table)
     }
 }
 
+void tableAddAll(Table *source, Table *dest)
+{
+    for (int i = 0; i < source->capacity; i++)
+    {
+        Entry *entry = &source->entries[i];
+        if (entry->key != NULL)
+        {
+            tableSet(dest, entry->key, entry->value);
+        }
+    }
+}
+
 void testHashTable()
 {
     Table table;

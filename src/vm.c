@@ -551,6 +551,15 @@ static InterpretResult run()
         case OP_METHOD:
             defineMethod(READ_STRING());
             break;
+        case OP_INHERIT:
+        {
+            ObjClass *superClass = AS_CLASS(peek(1));
+            ObjClass *subClass = AS_CLASS(peek(0));
+            tableAddAll(&superClass->methods, &subClass->methods);
+            pop(); // subClass
+            pop(); // superClass
+            break;
+        }
         default:
             fprintf(stderr, "instruction not implemented: %d\n", instruction);
             exit(1);
