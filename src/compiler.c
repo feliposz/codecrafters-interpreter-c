@@ -978,6 +978,10 @@ static void classDeclaration()
     uint8_t nameConstant = identifierConstant(&parser.previous);
     declareVariable();
     emitBytes(OP_CLASS, nameConstant);
+    if (match(TOKEN_LESS))
+    {
+        consume(TOKEN_IDENTIFIER, "Expect class name.");
+    }
     defineVariable(nameConstant);
     ClassCompiler classCompiler;
     classCompiler.enclosing = currentClass;
